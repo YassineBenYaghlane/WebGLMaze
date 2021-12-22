@@ -16,8 +16,8 @@ var make_camera = function(canvas, position, up, yaw, pitch) {
     // Euler angles
     var yaw = 90.0;
     var pitch = 0.0;
-    var movement_speed = 0.15;
-    var mouse_sensitivity = 1.5;
+    var movement_speed = 0.2;
+    var mouse_sensitivity = 3.0;
     var zoom = 0.0; // Not used anymore
 
     var dt = 0.0;
@@ -34,43 +34,75 @@ var make_camera = function(canvas, position, up, yaw, pitch) {
     }
 
     function register_keyboard() {
+        let keysPressed = {};
         document.addEventListener('keydown', (event) => {
-            const key = event.key;
-            
-            // Remove page scrolling with arrows to handle camera
-            if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
+            keysPressed[event.key] = true;
+         
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
                 event.view.event.preventDefault();
             }
-
-            if (key === 's' || key === '5' || key === 'u') {
+            
+            if (event.key === 'ArrowDown' || event.key === '5' || event.key === 'u') {
                 process_keyboard(CameraMovement.BACKWARD);
-                return;
-            } else if (key === 'z' || key === '8' || key === 'é') {
+            } else if (event.key === 'ArrowUp' || event.key === '8' || event.key === 'é') {
                 process_keyboard(CameraMovement.FORWARD);
-                return;
-            } else if (key === 'q' || key === '4' || key === 'a') {
+            } else if (event.key === 'ArrowLeft' || event.key === '4' || event.key === 'a') {
                 process_keyboard(CameraMovement.LEFT);
-                return;
-            } else if (key === 'd' || key === '6' || key === 'i') {
+            } else if (event.key === 'ArrowRight' || event.key === '6' || event.key === 'i') {
                 process_keyboard(CameraMovement.RIGHT);
-                return;
             }
 
             // TODO register_mouse not yet working
-            else if (key === 'ArrowUp' || key === '+' || key === 'Add') {
+            else if (event.key === 's' || event.key === '+' || event.key === 'Add') {
                 process_mouse_movement(0, 1.0);
-                return;
-            } else if (key === 'ArrowDown' || key === '-' || key === 'Subtract') {
+            } else if (event.key === 'z' || event.key === '-' || event.key === 'Subtract') {
                 process_mouse_movement(0, -1.0);
-                return;
-            } else if (key === 'ArrowLeft') {
+            } else if (event.key === 'q') {
                 process_mouse_movement(-1.0, 0.0);
-                return;
-            } else if (key === 'ArrowRight') {
+            } else if (event.key === 'd') {
                 process_mouse_movement(1.0, 0);
-                return;
             }
-        }, false);
+
+            if ((keysPressed['ArrowUp'] && event.key == 'q') || (keysPressed['q'] && event.key == 'ArrowUp')) {
+                process_keyboard(CameraMovement.FORWARD);
+                process_mouse_movement(-1.0, 0.0);
+            }
+            else if ((keysPressed['ArrowUp'] && event.key == 'd') || (keysPressed['d'] && event.key == 'ArrowUp')) {
+                process_keyboard(CameraMovement.FORWARD);
+                process_mouse_movement(1.0, 0);
+            }
+            else if ((keysPressed['ArrowDown'] && event.key == 'q') || (keysPressed['q'] && event.key == 'ArrowDown')) {
+                process_keyboard(CameraMovement.BACKWARD);
+                process_mouse_movement(-1.0, 0.0);
+            }
+            else if ((keysPressed['ArrowDown'] && event.key == 'd') || (keysPressed['d'] && event.key == 'ArrowDown')) {
+                process_keyboard(CameraMovement.BACKWARD);
+                process_mouse_movement(1.0, 0);
+            }
+
+            // if ((keysPressed['ArrowUp'] && event.key == 'ArrowLeft') || (keysPressed['ArrowLeft'] && event.key == 'ArrowUp')) {
+            //     process_keyboard(CameraMovement.FORWARD);
+            //     process_mouse_movement(-1.0, 0.0);
+            // }
+            // else if ((keysPressed['ArrowUp'] && event.key == 'ArrowRight') || (keysPressed['ArrowRight'] && event.key == 'ArrowUp')) {
+            //     process_keyboard(CameraMovement.FORWARD);
+            //     process_mouse_movement(1.0, 0);
+            // }
+            // else if ((keysPressed['ArrowDown'] && event.key == 'ArrowLeft') || (keysPressed['ArrowLeft'] && event.key == 'ArrowDown')) {
+            //     process_keyboard(CameraMovement.BACKWARD);
+            //     process_mouse_movement(-1.0, 0.0);
+            // }
+            // else if ((keysPressed['ArrowDown'] && event.key == 'ArrowRight') || (keysPressed['ArrowRight'] && event.key == 'ArrowDown')) {
+            //     process_keyboard(CameraMovement.BACKWARD);
+            //     process_mouse_movement(1.0, 0);
+            // }
+            
+            // console.log(keysPressed);
+        });
+         
+        document.addEventListener('keyup', (event) => {
+            delete keysPressed[event.key];
+        });
     }
 
     function register_mouse() {
@@ -114,7 +146,7 @@ var make_camera = function(canvas, position, up, yaw, pitch) {
     }
 
     function process_keyboard(direction) {
-        var velocity = movement_speed * dt;
+        var velocity = movement_speed; // * dt;
         tmp = glMatrix.vec3.create()
         if (direction == CameraMovement.FORWARD) {
             tmp = glMatrix.vec3.scale(tmp, front, velocity);
