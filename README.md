@@ -1,1 +1,1 @@
-# WebGLMaze
+# WebGLMazd
