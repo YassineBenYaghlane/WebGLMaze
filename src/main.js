@@ -24,7 +24,7 @@ void main() {
 gl_Position = P*V*M*vec4(position, 1);
 v_texcoord = texcoord;
 // We will display the normals as a color
-v_color = (normal+1.0)/2.0;
+v_color = vec3(1.0, 1.0, 1.0);
 }
 `;
 
@@ -37,17 +37,22 @@ uniform sampler2D u_texture;
 
 void main() {
 //gl_FragColor = texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
-gl_FragColor = vec4(normalize(v_color), 1.0);
+gl_FragColor = vec4(v_color, 1.0);
 }
 `;
 
     var shader_show_object = make_shader(gl, sourceV, sourceF);
     
     // loading the object from a file
-    var cube = await load_obj('../obj/bunny_big.obj');
+    var cube = await load_obj('../obj/wall.obj');
+    var cube2 = await load_obj('../obj/wall.obj');
     // Asynchronous call, we waited till the object was ready
     // Make the buffer and the functions to draw the object:
-    var cube_mesh = await make_object(gl, cube)
+    var cube_mesh = await make_object(gl, cube);
+    var cube_mesh2 = await make_object(gl, cube2);
+
+    cube_mesh2.model = glMatrix.mat4.translate(cube_mesh2.model,cube_mesh2.model,
+        glMatrix.vec3.fromValues(0.0, 2.0, 0.0));
 
     position = glMatrix.vec3.fromValues(0, 0, -4.0)
     up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0)
@@ -71,16 +76,20 @@ gl_FragColor = vec4(normalize(v_color), 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         shader_show_object.use();
-        cube_mesh.activate(shader_show_object);
-
         var unif = shader_show_object.get_uniforms();
 
+        cube_mesh.activate(shader_show_object);
         view = camera.get_view_matrix();
         gl.uniformMatrix4fv(unif['model'], false, cube_mesh.model);
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
-
         cube_mesh.draw();
+
+        cube_mesh2.activate(shader_show_object);
+        view = camera.get_view_matrix();
+        gl.uniformMatrix4fv(unif['model'], false, cube_mesh2.model);
+
+        cube_mesh2.draw();
 
         camera.show_view_html(camMatElem, camera.get_view_matrix())
         fps(time);
