@@ -24,7 +24,7 @@ void main() {
 gl_Position = P*V*M*vec4(position, 1);
 v_texcoord = texcoord;
 // We will display the normals as a color
-v_color = vec3(1.0, 0.0, 0.0);
+v_color = (normal + 1.0) / 2.0;
 }
 `;
 
