@@ -51,39 +51,39 @@ gl_FragColor = vec4(v_color, 1.0);
 
     var loader = await map_loader();
     var objects = loader.parse_map(gl);
-    console.log("in main");
-    console.log((await objects).length);
+
+    var player = await make_player(gl);
+    player.place_player();
 
     position = glMatrix.vec3.fromValues(0, 0, -4.0)
     up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0)
     yaw = -90.0
     pitch = 0.0
-    var camera = make_camera(canvas, position, up, yaw, pitch)
-    var projection = camera.get_projection(45.0, c_width / c_height, 0.01, 100.0)
+    var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
-    camera.show_projection_html(projMatElem, projection);
-
 
     var deltaTime = 0;
 
     function animate(time) {
         deltaTime += 0.005;
-        camera.update(deltaTime);
         //Draw loop
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         shader_show_object.use();
         var unif = shader_show_object.get_uniforms();
-        view = camera.get_view_matrix();
+        view = player.get_view_matrix();
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
 
+        player.draw_player(gl, shader_show_object, unif);
+
         loader.draw_map(gl, shader_show_object, unif);
 
-        camera.show_view_html(camMatElem, camera.get_view_matrix())
+        player.show_view_html(camMatElem, view);
+        player.show_model_html(projMatElem);
         fps(time);
         window.requestAnimationFrame(animate); // While(True) loop!
     }

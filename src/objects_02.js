@@ -73,7 +73,6 @@ var load_obj = async function(name = 'bunny_small.obj') {
         }
       }
       var vertexCount = vertices.length / 8;
-      console.log("Loaded mesh with " + vertexCount + " vertices");
       return {
         buffer: new Float32Array(vertices),
         num_triangles: vertexCount
@@ -99,8 +98,8 @@ var make_object = async function(gl, obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     var Model = glMatrix.mat4.create();
-    Model = glMatrix.mat4.scale(Model, Model, glMatrix.vec3.fromValues(0.2, 0.2, 0.2));
-    Model = glMatrix.mat4.translate(Model, Model, glMatrix.vec3.fromValues(0.5, -0.5, -1.0));
+    // Model = glMatrix.mat4.scale(Model, Model, glMatrix.vec3.fromValues(0.2, 0.2, 0.2));
+    // Model = glMatrix.mat4.translate(Model, Model, glMatrix.vec3.fromValues(0.5, -0.5, -1.0));
 
     function activate(shader) {
         // these object have all 3 positions + 2 textures + 3 normals
