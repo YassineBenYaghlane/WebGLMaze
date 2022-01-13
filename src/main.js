@@ -50,9 +50,10 @@ gl_FragColor = vec4(v_color, 1.0);
     // Make the buffer and the functions to draw the object:
 
     var loader = await map_loader();
-    var objects = loader.parse_map(gl);
+    loader.parse_map(gl, path="../maps/map.txt");
+    
 
-    var player = await make_player(gl);
+    var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
     player.place_player();
 
     position = glMatrix.vec3.fromValues(0, 0, -4.0)
@@ -64,10 +65,7 @@ gl_FragColor = vec4(v_color, 1.0);
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
 
-    var deltaTime = 0;
-
     function animate(time) {
-        deltaTime += 0.005;
         //Draw loop
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -79,8 +77,7 @@ gl_FragColor = vec4(v_color, 1.0);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
 
         player.draw_player(gl, shader_show_object, unif);
-
-        loader.draw_map(gl, shader_show_object, unif);
+        ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
 
         player.show_view_html(camMatElem, view);
         player.show_model_html(projMatElem);

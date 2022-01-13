@@ -50,6 +50,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     };
 
     function move_player() {
+        console.log(`move player called`);
         let keysPressed = {};
         document.addEventListener('keydown', (event) => {
             keysPressed[event.key] = true;
@@ -65,6 +66,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             } else if (event.key === 'q') {
                 process_keyboard(PlayerMovement.LEFT);
             } else if (event.key === 'd') {
+                console.log(`move right`);
                 process_keyboard(PlayerMovement.RIGHT);
             }
 
@@ -149,30 +151,43 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     
     function process_keyboard(direction) {
         tmp = glMatrix.vec3.create();
+        nextPos = glMatrix.vec3.clone(position);
         rad = Math.PI/4.0;
         if (direction == PlayerMovement.FORWARD) {
             tmp = glMatrix.vec3.scale(tmp, front, movement_speed);
-            position = glMatrix.vec3.add(position, position, tmp);
-            update_model_position(-rad, rolling_right);
-            update_rolling_axis(rad, rolling_front);
+            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
+            if(!ObjectLoader.getInstance().isCollision(nextPos)){
+                position = glMatrix.vec3.add(position, position, tmp);
+                update_model_position(-rad, rolling_right);
+                update_rolling_axis(rad, rolling_front);
+            }
         }
         if (direction == PlayerMovement.BACKWARD) {
             tmp = glMatrix.vec3.scale(tmp, front, -movement_speed);
-            position = glMatrix.vec3.add(position, position, tmp);
-            update_model_position(rad, rolling_right);
-            update_rolling_axis(-rad, rolling_front);
+            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
+            if(!ObjectLoader.getInstance().isCollision(nextPos)){
+                position = glMatrix.vec3.add(position, position, tmp);
+                update_model_position(rad, rolling_right);
+                update_rolling_axis(-rad, rolling_front);
+            }
         }
         if (direction == PlayerMovement.LEFT) {
             tmp = glMatrix.vec3.scale(tmp, right, -movement_speed);
-            position = glMatrix.vec3.add(position, position, tmp);
-            update_model_position(-rad, rolling_front);
-            update_rolling_axis(-rad, rolling_right);
+            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
+            if(!ObjectLoader.getInstance().isCollision(nextPos)){
+                position = glMatrix.vec3.add(position, position, tmp);
+                update_model_position(-rad, rolling_front);
+                update_rolling_axis(-rad, rolling_right);
+            }
         }
         if (direction == PlayerMovement.RIGHT) {
             tmp = glMatrix.vec3.scale(tmp, right, movement_speed);
-            position = glMatrix.vec3.add(position, position, tmp);
-            update_model_position(rad, rolling_front);
-            update_rolling_axis(rad, rolling_right);
+            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
+            if(!ObjectLoader.getInstance().isCollision(nextPos)){
+                position = glMatrix.vec3.add(position, position, tmp);
+                update_model_position(rad, rolling_front);
+                update_rolling_axis(rad, rolling_right);
+            }
         }
     }
 
