@@ -11,34 +11,62 @@ async function main() {
 
     const sourceV = `
 attribute vec3 position;
-attribute vec2 texcoord;
 attribute vec3 normal;
-varying vec2 v_texcoord;
-varying vec3 v_color;
+
+varying vec3 v_normal;
+varying vec3 v_frag_coord;
 
 uniform mat4 M;
+uniform mat4 itM;  // inverse transpose model!
 uniform mat4 V;
 uniform mat4 P;
 
 void main() {
-gl_Position = P*V*M*vec4(position, 1);
-v_texcoord = texcoord;
+vec4 frag_coord = M*vec4(position, 1.0);
+gl_Position = P*V*frag_coord;
+
+// Transform correctly the normals!
+v_normal = vec3(itM * vec4(normal, 1.0));
+
+v_frag_coord = frag_coord.xyz;
+
 // We will display the normals as a color
-v_color = (normal + 1.0) / 2.0;
+//v_color = (normal + 1.0) / 2.0;
 }
 `;
 
     const sourceF = `
-precision mediump float;
-varying vec2 v_texcoord;
-varying vec3 v_color;
+    precision mediump float;
+    varying vec3 v_normal;
+    varying vec3 v_frag_coord;
+    
+    uniform vec3 u_light_pos;
+    uniform vec3 u_view_dir;
 
-uniform sampler2D u_texture;
+    void main() {
+      vec3 normal = normalize(v_normal);
+      
+      // light color
+      vec3 light_color = vec3(0.9, 0.3, 0.4);
+      
+      // Ambient
+      float ambient = 0.1;
+      
+      vec3 L = normalize(u_light_pos - v_frag_coord);
+      
+      // Diffuse
+      float diffusion = max(0.0, dot(v_normal, L));
+      
+      // specural
+      float spec_strength = 0.8;
+      vec3 view_dir = normalize(u_view_dir - v_frag_coord);
+      vec3 reflect_dir = reflect(-L, normal);
+      float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+      float specular = spec_strength * spec;
 
-void main() {
-//gl_FragColor = texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
-gl_FragColor = vec4(v_color, 1.0);
-}
+      vec3 color = (ambient + specular + diffusion) * light_color;
+      gl_FragColor = vec4(color, 1.0);
+    }
 `;
 
 
@@ -58,6 +86,16 @@ gl_FragColor = vec4(v_color, 1.0);
 
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 
+    // We define a light in space and retrieve its ID in the shader
+    const light_pos = glMatrix.vec3.fromValues(0.0, 2.0, -10.0);
+    const u_light_pos = gl.getUniformLocation(shader_show_object.program, 'u_light_pos');
+    
+    // We need to send the inverse transpose of the model matrix for the model
+    const u_itM = gl.getUniformLocation(shader_show_object.program, 'itM');
+    
+    // We need the camera position
+    const u_view_dir = gl.getUniformLocation(shader_show_object.program, 'u_view_dir');
+
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
 
@@ -71,6 +109,12 @@ gl_FragColor = vec4(v_color, 1.0);
         view = player.get_view_matrix();
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
+        // Send the light position to the shader
+        gl.uniform3fv(u_light_pos, light_pos);
+        // Add the viewer position
+        console.log(typeof( player.get_camera_position()))
+        // Set one time the camera position for all the shaders
+        gl.uniform3fv(u_view_dir, player.get_camera_position());
 
         player.draw_player(gl, shader_show_object, unif);
         ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);

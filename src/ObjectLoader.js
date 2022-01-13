@@ -126,6 +126,10 @@ var ObjectLoader = (function() {
             for(var i = 0; i < this.objects.length; i++){
                 this.objects[i].getMesh().activate(shader_show_object);
                 gl.uniformMatrix4fv(unif['model'], false, this.objects[i].getMesh().model);
+                let itM = glMatrix.mat4.create();
+                itM = glMatrix.mat4.invert(itM, this.objects[i].getMesh().model);
+                itM = glMatrix.mat4.transpose(itM, itM);
+                gl.uniformMatrix4fv(gl.getUniformLocation(shader_show_object.program, 'itM'), false, itM);
                 this.objects[i].getMesh().draw();
             };
         };

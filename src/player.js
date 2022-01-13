@@ -12,6 +12,8 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     var up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
     var right = glMatrix.vec3.fromValues(-1.0, 0.0, 0.0);
     var world_up = up;
+
+    var camera_position = glMatrix.vec3.create();
     
     var yaw = 90.0;
     var pitch = 0.0;
@@ -46,6 +48,11 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     function draw_player(gl, shader_show_object, unif) {
         player.activate(shader_show_object);
         gl.uniformMatrix4fv(unif['model'], false, player.model);
+        let itM = glMatrix.mat4.create();
+        itM = glMatrix.mat4.invert(itM, player.model);
+        itM = glMatrix.mat4.transpose(itM, itM);
+        itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader_show_object.program, 'itM'), false, itM);
         player.draw();
     };
 
@@ -248,7 +255,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
 
         tmp = glMatrix.vec3.scale(tmp, camera_front, 0.5);
 
-        camera_position = glMatrix.vec3.create();
+        // camera_position = glMatrix.vec3.create();
         camera_position = glMatrix.vec3.subtract(camera_position, position, tmp);
 
         camera_up = glMatrix.vec3.create();
@@ -268,6 +275,10 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
 
     function get_position() {
         return position;
+    }
+
+    function get_camera_position() {
+        return camera_position;
     }
 
     function show_view_html(tag, view) {
@@ -298,6 +309,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         get_view_matrix: get_view_matrix,
         get_projection: get_projection,
         get_position: get_position,
+        get_camera_position: get_camera_position,
         show_model_html: show_model_html,
         show_view_html: show_view_html
     }
