@@ -1,6 +1,6 @@
 class GameObject {
-    objectData = null;
-    mesh = null;
+    objectData = null; // données du fichier .obj loadé
+    mesh = null; // apres make object
 
     constructor(name = 'cube', x=0.0, y=0.0, z=0.0){
         this.name = name;

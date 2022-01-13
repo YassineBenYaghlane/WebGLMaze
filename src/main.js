@@ -56,10 +56,6 @@ gl_FragColor = vec4(v_color, 1.0);
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
     player.place_player();
 
-    position = glMatrix.vec3.fromValues(0, 0, -4.0)
-    up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0)
-    yaw = -90.0
-    pitch = 0.0
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 
     const camMatElem = document.querySelector("#camera_mat");
