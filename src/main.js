@@ -69,8 +69,61 @@ v_frag_coord = frag_coord.xyz;
     }
 `;
 
+            const sourceCubemapV = `
+      attribute vec3 position;
+      attribute vec2 texcoord;
+      attribute vec3 normal;
+      varying vec3 v_texcoord;
+      
+      uniform mat4 M;
+      uniform mat4 itM;  // inverse transpose model!
+      uniform mat4 V;
+      uniform mat4 P;
+
+      // If you look at internet, different and maybe better ways
+      // exist to define a skybox/environmental map/cubemap ;)
+      // here it is defined like this only for convenience
+      void main() {
+        // we do NOT multiply by the model as
+        // the cubemap should not move with the camera!
+        // We keep only the rotation from the View matrix
+        mat3 Vrotation = mat3(V);
+        vec4 frag_coord = vec4(position, 1.0);
+        // the positions xyz are divided by w after the vertex shader
+        // the z component is equal to the depth value
+        // we want a z always equal to 1.0 here, so we set z = w!
+        // Remember: z=1.0 is the MAXIMUM depth value ;)
+        // When we will have other objects, we need to change the
+        // depth evaluation function (see next exercise)
+        gl_Position = (P*mat4(Vrotation)*frag_coord).xyww;
+        
+        // We set the texture coordinates accordingly
+        // to the position!
+        v_texcoord = frag_coord.xyz;
+      }
+    `;
+
+            const sourceCubemapF = `
+      precision mediump float;
+      varying vec3 v_texcoord;
+      
+      // We have a samplerCube this time! not a 2D texture
+      uniform samplerCube u_cubemap;
+
+      void main() {
+        //gl_FragColor = texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
+        // We sample the cube at the position of the vertices!
+        gl_FragColor = textureCube(u_cubemap, v_texcoord);
+      }
+    `;
+
 
     var shader_show_object = make_shader(gl, sourceV, sourceF);
+    var shader_cubemap = make_shader(gl, sourceCubemapV, sourceCubemapF);
+            
+    // loading the object from a file
+    var cubemapObject = await ObjectLoader.getInstance().getObjectData("cube");
+    var cubemapMesh = await ObjectLoader.getInstance().make_object(gl, cubemapObject);
     
     // loading the object from a file
     // var cube = await load_obj('../obj/wall.obj');
@@ -99,14 +152,44 @@ v_frag_coord = frag_coord.xyz;
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
 
+    // Retrieve the adress of the cubemap texture
+    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/yokohama3');
+    const u_cubemap = gl.getUniformLocation(shader_cubemap.program, 'u_cubemap');
+
     function animate(time) {
         //Draw loop
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+
+
+        view = player.get_view_matrix();
+
+        // Shader for cubemap
+        gl.depthFunc(gl.LEQUAL);
+        shader_cubemap.use();
+        cubemapMesh.activate(shader_cubemap);
+
+        var unif = shader_cubemap.get_uniforms();
+
+        gl.uniformMatrix4fv(unif['model'], false, cubemapMesh.model);
+        gl.uniformMatrix4fv(unif['view'], false, view);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+        
+        // Activate the texture for the cube
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texCube);
+        gl.uniform1i(u_cubemap, 0);
+
+        cubemapMesh.draw();
+        // set back the depth function for next frame
+        gl.depthFunc(gl.LESS);
+
+        // Classic shaders for objects
 
         shader_show_object.use();
         var unif = shader_show_object.get_uniforms();
-        view = player.get_view_matrix();
+        
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
         // Send the light position to the shader
