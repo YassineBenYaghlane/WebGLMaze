@@ -108,7 +108,7 @@ var make_shader = function (gl, name) {
           }
         `;
     
-        const sourceEffectV = `
+        const sourceReflexionV = `
         attribute vec3 position;
         attribute vec2 texcoord;
         attribute vec3 normal;
@@ -129,7 +129,7 @@ var make_shader = function (gl, name) {
         }
       `;
     
-              const sourceEffectF = `
+              const sourceReflexionF = `
         precision mediump float;
         
         varying vec3 v_normal;
@@ -146,6 +146,53 @@ var make_shader = function (gl, name) {
           gl_FragColor = vec4(textureCube(u_cubemap, R).rgb, 1.0);
         }
       `;
+      const sourceRefractionV = `
+      attribute vec3 position;
+      attribute vec2 texcoord;
+      attribute vec3 normal;
+      
+      varying vec3 v_normal;
+      varying vec3 v_frag_coord;
+      
+      uniform mat4 M;
+      uniform mat4 itM;  // inverse transpose model!
+      uniform mat4 V;
+      uniform mat4 P;
+
+      void main() {
+        vec4 frag_coord = M*vec4(position, 1.0);
+        gl_Position = (P*V*frag_coord);
+        v_normal = vec3(itM * vec4(normal, 1.0));
+        v_frag_coord = frag_coord.xyz;
+      }
+    `;
+
+            const sourceRefractionF = `
+      precision mediump float;
+      
+      varying vec3 v_normal;
+      varying vec3 v_frag_coord;
+      
+      // We need the camera position to display a reflection/refraction!
+      uniform vec3 u_view_dir;
+      // This time We need the cubemap to display a reflection/refraction!
+      uniform samplerCube u_cubemap;
+
+      void main() {
+        /*
+            Refraction indices:
+            Air:      1.0
+            Water:    1.33
+            Ice:      1.309
+            Glass:    1.52
+            Diamond:  2.42
+        */
+        float ratio = 1.00 / 1.52;
+        vec3 I = normalize(v_frag_coord - u_view_dir);
+        vec3 R = refract(I, normalize(v_normal), ratio);
+        gl_FragColor = vec4(textureCube(u_cubemap, R).rgb, 1.0);
+      }
+    `;
 
     function compile_shader(source, type) {
         var shader = gl.createShader(type);
@@ -206,9 +253,16 @@ var make_shader = function (gl, name) {
             vertex_shader = sourceCubemapV;
             fragment_shader = sourceCubemapF;
             break;
-        case "effect":
-            vertex_shader = sourceEffectV;
-            fragment_shader = sourceEffectF;
+        case "reflexion":
+            vertex_shader = sourceReflexionV;
+            fragment_shader = sourceReflexionF;
+            break;
+        case "refraction":
+            vertex_shader = sourceRefractionV;
+            fragment_shader = sourceRefractionF;
+            break;
+        default:
+            console.log("Wrong shader type");
             break;
     }
     

@@ -11,7 +11,7 @@ async function main() {
 
     var shader_show_object = make_shader(gl, "normal");
     var shader_cubemap = make_shader(gl, "cubemap");
-    var shader_effect = make_shader(gl, "effect");
+    var shader_reflexion = make_shader(gl, "refraction");
             
     // loading the object from a file
     var cubemapObject = await ObjectLoader.getInstance().getObjectData("cube");
@@ -89,10 +89,10 @@ async function main() {
         // Effect shader
 
         // draw our scene
-        shader_effect.use();``
-        player.playerMesh.activate(shader_effect);
+        shader_reflexion.use();
+        player.playerMesh.activate(shader_reflexion);
 
-        var unif = shader_effect.get_uniforms();
+        var unif = shader_reflexion.get_uniforms();
 
         gl.uniformMatrix4fv(unif['model'], false, player.playerMesh.model);
         gl.uniformMatrix4fv(unif['view'], false, view);
