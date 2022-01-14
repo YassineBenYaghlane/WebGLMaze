@@ -1,4 +1,7 @@
 var map_loader = async function() {
+
+    var start_position = [0.0, 0.0, 0.0];
+    var end_position = [0.0, 0.0, 0.0];
     
     async function parse_map(gl, path="../maps/map.txt", obj_type="cube", obj_width=2, obj_height=2, obj_depth=2) {
         const response = await fetch(path);
@@ -26,6 +29,12 @@ var map_loader = async function() {
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         break;
+                    case 'S':
+                        start_position = [(-j) * obj_width, -0.8, (height - i) * obj_depth];
+                        break;
+                    case 'F':
+                        end_position = [(-j) * obj_width, 0.0, (height - i) * obj_depth];
+                        break;
                     case ' ':
                         break;
                     case 'C':
@@ -40,7 +49,17 @@ var map_loader = async function() {
         }
     };
 
+    function getStartPosition(){
+        return start_position;
+    }
+
+    function getEndPosition(){
+        return end_position;
+    }
+
     return {
+        getStartPosition: getStartPosition,
+        getEndPosition: getEndPosition,
         parse_map: parse_map
     }
 }

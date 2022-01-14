@@ -24,13 +24,14 @@ async function main() {
     // Make the buffer and the functions to draw the object:
 
     var loader = await map_loader();
-    loader.parse_map(gl, path="../maps/map.txt", objt_type="cube_texture");
+    await loader.parse_map(gl, path="../maps/map.txt", objt_type="cube_texture");
     
     var brick_texture = make_texture(gl, "../textures/brick.jpg");
     var brick_normalMap = make_texture(gl, "../textures/BrickNormal.png");
 
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
-    player.place_player();
+    player.place_player(loader.getStartPosition());
+    player.setEndPosition(loader.getEndPosition());
 
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 

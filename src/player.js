@@ -12,6 +12,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     var up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
     var right = glMatrix.vec3.fromValues(-1.0, 0.0, 0.0);
     var world_up = up;
+    var end_position = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
 
     var camera_position = glMatrix.vec3.create();
     
@@ -40,10 +41,16 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         playerMesh.model = glMatrix.mat4.rotate(playerMesh.model, playerMesh.model, angle, axis);
     }
     
-    function place_player() {
+    function place_player(pos) {
+        console.log(pos)
+        position = glMatrix.vec3.fromValues(pos[0], pos[1], pos[2]);
         update_model_position();
         playerMesh.model = glMatrix.mat4.scale(playerMesh.model, playerMesh.model, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
     };
+
+    function setEndPosition(pos){
+        end_position = glMatrix.vec3.fromValues(pos[0], pos[1], pos[2]);
+    }
 
     function draw_player(gl, shader, unif) {
         
@@ -199,6 +206,12 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
                 update_rolling_axis(rad, rolling_right);
             }
         }
+
+        if(position[0] >= end_position[0] - 1.0 && position[0] <= end_position[0] + 1.0 &&
+            position[1] >= end_position[1] - 1.0 && position[1] <= end_position[1] + 1.0 &&
+            position[2] >= end_position[2] - 1.0 && position[2] <= end_position[2] + 1.0){
+            console.log("FINISHED");
+        }
     }
 
     function deg2rad(deg) {
@@ -308,6 +321,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     return {
         playerMesh: playerMesh,
         place_player: place_player,
+        setEndPosition: setEndPosition,
         draw_player: draw_player,
         get_view_matrix: get_view_matrix,
         get_projection: get_projection,
