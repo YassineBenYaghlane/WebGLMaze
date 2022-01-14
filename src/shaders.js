@@ -352,6 +352,7 @@ var make_shader = function (gl, name) {
     const program = create_program(shaderV, shaderF);
     
     return {
+        name:name,
         program:program,
         get_uniforms:get_uniforms,
         use:use,

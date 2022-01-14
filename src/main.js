@@ -74,20 +74,20 @@ async function main() {
 
         // Classic shaders for objects
 
-        // shader_show_object.use();
-        // var unif = shader_show_object.get_uniforms();
+        shader_show_object.use();
+        var unif = shader_show_object.get_uniforms();
         
-        // gl.uniformMatrix4fv(unif['view'], false, view);
-        // gl.uniformMatrix4fv(unif['proj'], false, projection);
-        // // Send the light position to the shader
-        // gl.uniform3fv(unif["u_light_pos"], light_pos);
-        // // Add the viewer position
-        // console.log(typeof( player.get_camera_position()))
-        // // Set one time the camera position for all the shaders
-        // gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
+        gl.uniformMatrix4fv(unif['view'], false, view);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+        // Send the light position to the shader
+        gl.uniform3fv(unif["u_light_pos"], light_pos);
+        // Add the viewer position
+        console.log(typeof( player.get_camera_position()))
+        // Set one time the camera position for all the shaders
+        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
   
         
-        // ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
+        ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
 
         // Texture Shader
         shader_texture.use();

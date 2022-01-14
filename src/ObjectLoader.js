@@ -249,15 +249,20 @@ var ObjectLoader = (function() {
         return ret;
     }
 		
-        this.draw_map = function(gl, shader_show_object, unif){
+        this.draw_map = function(gl, shader, unif){
             for(var i = 0; i < this.objects.length; i++){
-                this.objects[i].getMesh().activate(shader_show_object);
-                gl.uniformMatrix4fv(unif['model'], false, this.objects[i].getMesh().model);
-                let itM = glMatrix.mat4.create();
-                itM = glMatrix.mat4.invert(itM, this.objects[i].getMesh().model);
-                itM = glMatrix.mat4.transpose(itM, itM);
-                gl.uniformMatrix4fv(gl.getUniformLocation(shader_show_object.program, 'itM'), false, itM);
-                this.objects[i].getMesh().draw();
+              if(this.objects[i].getShader() == shader.name){
+                  this.objects[i].getMesh().activate(shader);
+                  gl.uniformMatrix4fv(unif['model'], false, this.objects[i].getMesh().model);
+                  let itM = glMatrix.mat4.create();
+                  itM = glMatrix.mat4.invert(itM, this.objects[i].getMesh().model);
+                  itM = glMatrix.mat4.transpose(itM, itM);
+                  if(this.objects[i] instanceof Plan){
+                    itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(this.objects[i].getWidth()/2.0, 0.01, this.objects[i].getDepth()/2.0));
+                  }
+                  gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
+                  this.objects[i].getMesh().draw();
+              }
             };
         };
 

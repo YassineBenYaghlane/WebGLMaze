@@ -2,11 +2,12 @@ class GameObject {
     objectData = null; // données du fichier .obj loadé
     mesh = null; // apres make object
 
-    constructor(name = 'cube', x=0.0, y=0.0, z=0.0){
+    constructor(name = 'cube', x=0.0, y=0.0, z=0.0, shader="normal"){
         this.name = name;
         this.x = x;
         this.y = y;
         this.z = z;
+        this.shader = shader;
         this.objectData = ObjectLoader.getInstance().getObjectData(name);
     }
 
@@ -32,6 +33,10 @@ class GameObject {
 
     getMesh(){
         return this.mesh;
+    }
+
+    getShader(){
+        return this.shader;
     }
 
 }
