@@ -8,21 +8,28 @@ var map_loader = async function() {
         const width = lines[0].length;
         const height = lines.length;
 
-        
+        var plan = new Plan(y=-1.0, width*2.0, height*2.0);
+        await plan.make(gl);
+        ObjectLoader.getInstance().addObject(plan);
+
+        var ceiling = new Plan(y=1.0, width*2.0, height*2.0);
+        await ceiling.make(gl);
+        ObjectLoader.getInstance().addObject(ceiling);
+
         for(var i = 0; i < height; i++){
             var line = lines[i];
             for(var j = 0; j < width; j++){
                 var char = line[j];
                 switch(char){
                     case 'W':
-                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth);
+                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         break;
                     case ' ':
                         break;
                     case 'C':
-                        var go = new GameObject(obj_type, 0.0, 0.0, 0.0);
+                        var go = new GameObject(obj_type, 0.0, 0.0, 0.0, "texture");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         break;
