@@ -202,12 +202,10 @@ var make_shader = function (gl, name) {
       attribute vec3 bitangent;
 
       varying vec2 v_texcoord;
-      varying vec3 v_normal;
       varying vec3 v_frag_coord;
       varying mat3 TBN;
       
       uniform mat4 M;
-      uniform mat4 itM;  // inverse transpose model!
       uniform mat4 V;
       uniform mat4 P;
       
@@ -216,19 +214,21 @@ var make_shader = function (gl, name) {
         gl_Position = P*V*frag_coord;
 
         v_frag_coord = frag_coord.xyz;
-        v_normal = vec3(itM * vec4(normal, 1.0));
         v_texcoord = texcoord;
 
         vec3 T = normalize(vec3(M * vec4(tangent,   0.0)));
-        vec3 B = normalize(vec3(M * vec4(bitangent, 0.0)));
         vec3 N = normalize(vec3(M * vec4(normal,    0.0)));
+
+        T = normalize(T - dot(T, N) * N);
+
+        vec3 B = cross(N, T);
+
         TBN = mat3(T, B, N);
       }
     `;
 
             const sourceF_texture = `
       precision mediump float;
-      varying vec3 v_normal;
       varying vec3 v_frag_coord;
       varying vec2 v_texcoord;
       varying mat3 TBN;

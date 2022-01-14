@@ -64,7 +64,7 @@ async function main() {
         gl.uniformMatrix4fv(unif['proj'], false, projection);
         
         // Activate the texture for the cube
-        gl.activeTexture(gl.TEXTURE0);
+        gl.activeTexture(gl.TEXTURE0 + 0);
         gl.bindTexture(gl.TEXTURE_2D, texCube);
         gl.uniform1i(unif["u_cubemap"], 0);
 
@@ -114,9 +114,9 @@ async function main() {
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
 
-        gl.activeTexture(gl.TEXTURE0 + 2);
+        gl.activeTexture(gl.TEXTURE0 + 0);
         gl.bindTexture(gl.TEXTURE_2D, texCube);
-        gl.uniform1i(unif["u_cubemap"], 2);
+        gl.uniform1i(unif["u_cubemap"], 0);
 
         player.draw_player(gl, shader_reflexion, unif);
 
