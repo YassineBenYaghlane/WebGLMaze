@@ -26,8 +26,8 @@ async function main() {
     var loader = await map_loader();
     await loader.parse_map(gl, path="../maps/map.txt", objt_type="cube_texture");
     
-    var brick_texture = make_texture(gl, "../textures/brick.jpg");
-    var brick_normalMap = make_texture(gl, "../textures/BrickNormal.png");
+    var brick_texture = make_texture(gl, "../textures/test.jpeg");
+    var brick_normalMap = make_texture(gl, "../textures/testNormalMap.png");
 
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
     player.setStartPosition(loader.getStartPosition());
