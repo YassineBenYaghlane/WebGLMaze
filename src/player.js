@@ -45,14 +45,14 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         player.model = glMatrix.mat4.scale(player.model, player.model, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
     };
 
-    function draw_player(gl, shader_show_object, unif) {
-        player.activate(shader_show_object);
+    function draw_player(gl, shader, unif) {
+        player.activate(shader);
         gl.uniformMatrix4fv(unif['model'], false, player.model);
         let itM = glMatrix.mat4.create();
         itM = glMatrix.mat4.invert(itM, player.model);
         itM = glMatrix.mat4.transpose(itM, itM);
         itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader_show_object.program, 'itM'), false, itM);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
         player.draw();
     };
 

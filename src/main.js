@@ -117,9 +117,49 @@ v_frag_coord = frag_coord.xyz;
       }
     `;
 
+    const source_effect_V = `
+    attribute vec3 position;
+    attribute vec2 texcoord;
+    attribute vec3 normal;
+    
+    varying vec3 v_normal;
+    varying vec3 v_frag_coord;
+    
+    uniform mat4 M;
+    uniform mat4 itM;  // inverse transpose model!
+    uniform mat4 V;
+    uniform mat4 P;
+
+    void main() {
+      vec4 frag_coord = M*vec4(position, 1.0);
+      gl_Position = (P*V*frag_coord);
+      v_normal = vec3(itM * vec4(normal, 1.0));
+      v_frag_coord = frag_coord.xyz;
+    }
+  `;
+
+          const source_effect_F = `
+    precision mediump float;
+    
+    varying vec3 v_normal;
+    varying vec3 v_frag_coord;
+    
+    // We need the camera position to display a reflection/refraction!
+    uniform vec3 u_view_dir;
+    // This time We need the cubemap to display a reflection/refraction!
+    uniform samplerCube u_cubemap;
+
+    void main() {
+      vec3 I = normalize(v_frag_coord - u_view_dir);
+      vec3 R = reflect(I, normalize(v_normal));
+      gl_FragColor = vec4(textureCube(u_cubemap, R).rgb, 1.0);
+    }
+  `;
+
 
     var shader_show_object = make_shader(gl, sourceV, sourceF);
     var shader_cubemap = make_shader(gl, sourceCubemapV, sourceCubemapF);
+    var shader_effect = make_shader(gl, source_effect_V, source_effect_F);
             
     // loading the object from a file
     var cubemapObject = await ObjectLoader.getInstance().getObjectData("cube");
@@ -153,7 +193,7 @@ v_frag_coord = frag_coord.xyz;
     const projMatElem = document.querySelector("#proj_mat");
 
     // Retrieve the adress of the cubemap texture
-    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/yokohama3');
+    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/fortnite');
     const u_cubemap = gl.getUniformLocation(shader_cubemap.program, 'u_cubemap');
 
     function animate(time) {
@@ -198,7 +238,7 @@ v_frag_coord = frag_coord.xyz;
         console.log(typeof( player.get_camera_position()))
         // Set one time the camera position for all the shaders
         gl.uniform3fv(u_view_dir, player.get_camera_position());
-
+  
         player.draw_player(gl, shader_show_object, unif);
         ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
 
