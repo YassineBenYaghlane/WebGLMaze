@@ -305,7 +305,6 @@ var ObjectLoader = (function() {
 	}
 
   this.make_object_texture = async function(gl, obj) {
-    console.log('make_object_texture');
     // We need the object to be ready to proceed:
     obj = await obj;
     
@@ -345,7 +344,6 @@ var ObjectLoader = (function() {
     }
 
     function draw() {
-        console.log('draw');
         gl.drawArrays(gl.TRIANGLES, 0, obj.num_triangles);
     }
 
