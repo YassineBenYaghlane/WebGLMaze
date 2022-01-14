@@ -316,7 +316,7 @@ var ObjectLoader = (function() {
 
     var Model = glMatrix.mat4.create();
     //Model = glMatrix.mat4.scale(Model, Model, glMatrix.vec3.fromValues(0.1, 0.1, 0.1));
-    Model = glMatrix.mat4.translate(Model, Model, glMatrix.vec3.fromValues(0.5, -0.5, -1.0));
+    // Model = glMatrix.mat4.translate(Model, Model, glMatrix.vec3.fromValues(0.5, -0.5, -1.0));
 
     function activate(shader) {
         // these object have all 3 positions + 2 textures + 3 normals + 3 tangents + 3 bitangents
