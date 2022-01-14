@@ -87,30 +87,16 @@ async function main() {
         ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
 
         // Effect shader
-
-        // draw our scene
         shader_reflexion.use();
-        player.playerMesh.activate(shader_reflexion);
-
         var unif = shader_reflexion.get_uniforms();
-
-        gl.uniformMatrix4fv(unif['model'], false, player.playerMesh.model);
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
-
-        let itM = glMatrix.mat4.create();
-        itM = glMatrix.mat4.invert(itM, player.playerMesh.model);
-        itM = glMatrix.mat4.transpose(itM, itM);
-        itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
-        gl.uniformMatrix4fv(unif['itM'], false, itM);
-       
-        gl.uniform3fv(unif['u_view_dir'], player.get_camera_position());
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texCube);
         gl.uniform1i(unif["u_cubemap"], 0);
 
-        player.playerMesh.draw();
+        player.draw_player(gl, shader_reflexion, unif);
 
         // Print Infos
         player.show_view_html(camMatElem, view);

@@ -46,13 +46,16 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     };
 
     function draw_player(gl, shader, unif) {
-        playerMesh.activate(shader);
+        
         gl.uniformMatrix4fv(unif['model'], false, playerMesh.model);
         let itM = glMatrix.mat4.create();
         itM = glMatrix.mat4.invert(itM, playerMesh.model);
         itM = glMatrix.mat4.transpose(itM, itM);
         itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
+        gl.uniformMatrix4fv(unif['itM'], false, itM);
+        gl.uniform3fv(unif['u_view_dir'], get_camera_position());
+        
+        playerMesh.activate(shader);
         playerMesh.draw();
     };
 
