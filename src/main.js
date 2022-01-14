@@ -30,8 +30,9 @@ async function main() {
     var brick_normalMap = make_texture(gl, "../textures/BrickNormal.png");
 
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
-    player.place_player(loader.getStartPosition());
+    player.setStartPosition(loader.getStartPosition());
     player.setEndPosition(loader.getEndPosition());
+    player.place_player();
 
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 

@@ -12,6 +12,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     var up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
     var right = glMatrix.vec3.fromValues(-1.0, 0.0, 0.0);
     var world_up = up;
+    var start_position = glMatrix.vec3.fromValues(0.0, -0.8, -4.0);
     var end_position = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
 
     var camera_position = glMatrix.vec3.create();
@@ -41,12 +42,19 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         playerMesh.model = glMatrix.mat4.rotate(playerMesh.model, playerMesh.model, angle, axis);
     }
     
-    function place_player(pos) {
-        console.log(pos)
-        position = glMatrix.vec3.fromValues(pos[0], pos[1], pos[2]);
-        update_model_position();
+    function place_player() {
+        teleport(start_position);
         playerMesh.model = glMatrix.mat4.scale(playerMesh.model, playerMesh.model, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
     };
+
+    function teleport(pos){
+        position = glMatrix.vec3.fromValues(pos[0], pos[1], pos[2]);
+        update_model_position();
+    }
+
+    function setStartPosition(pos){
+        start_position = glMatrix.vec3.fromValues(pos[0], pos[1], pos[2]);
+    }
 
     function setEndPosition(pos){
         end_position = glMatrix.vec3.fromValues(pos[0], pos[1], pos[2]);
@@ -83,9 +91,11 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             } else if (event.key === 'q') {
                 process_keyboard(PlayerMovement.LEFT);
             } else if (event.key === 'd') {
-                console.log(`move right`);
                 process_keyboard(PlayerMovement.RIGHT);
+            } else if (event.key === 'r') {
+                teleport(start_position);
             }
+
 
             else if (event.key === 'ArrowLeft') {
                 process_rotation_movement(-1.0, 0.0);
@@ -211,6 +221,8 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             position[1] >= end_position[1] - 1.0 && position[1] <= end_position[1] + 1.0 &&
             position[2] >= end_position[2] - 1.0 && position[2] <= end_position[2] + 1.0){
             console.log("FINISHED");
+            
+            teleport(glMatrix.vec3.fromValues(0.0, -0.8, -4.0));
         }
     }
 
@@ -321,6 +333,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     return {
         playerMesh: playerMesh,
         place_player: place_player,
+        setStartPosition: setStartPosition,
         setEndPosition: setEndPosition,
         draw_player: draw_player,
         get_view_matrix: get_view_matrix,
