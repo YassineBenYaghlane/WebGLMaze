@@ -21,7 +21,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     var mouse_sensitivity = 4.0;
     
     var object = await load_obj(obj_path);
-    var player = await make_object(gl, object);
+    var playerMesh = await make_object(gl, object);
 
     var rolling_front = glMatrix.vec3.create();
     rolling_front = glMatrix.vec3.copy(rolling_front, front);
@@ -34,26 +34,26 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     update_camera_vectors();
 
     function update_model_position(angle=0.0, axis=up) {
-        player.model[12] = position[0];
-        player.model[13] = position[1];
-        player.model[14] = position[2];
-        player.model = glMatrix.mat4.rotate(player.model, player.model, angle, axis);
+        playerMesh.model[12] = position[0];
+        playerMesh.model[13] = position[1];
+        playerMesh.model[14] = position[2];
+        playerMesh.model = glMatrix.mat4.rotate(playerMesh.model, playerMesh.model, angle, axis);
     }
     
     function place_player() {
         update_model_position();
-        player.model = glMatrix.mat4.scale(player.model, player.model, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
+        playerMesh.model = glMatrix.mat4.scale(playerMesh.model, playerMesh.model, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
     };
 
     function draw_player(gl, shader, unif) {
-        player.activate(shader);
-        gl.uniformMatrix4fv(unif['model'], false, player.model);
+        playerMesh.activate(shader);
+        gl.uniformMatrix4fv(unif['model'], false, playerMesh.model);
         let itM = glMatrix.mat4.create();
-        itM = glMatrix.mat4.invert(itM, player.model);
+        itM = glMatrix.mat4.invert(itM, playerMesh.model);
         itM = glMatrix.mat4.transpose(itM, itM);
         itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
         gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
-        player.draw();
+        playerMesh.draw();
     };
 
     function move_player() {
@@ -210,7 +210,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     
         yaw += xoffset;
         xoffset = deg2rad(xoffset);
-        player.model = glMatrix.mat4.rotate(player.model, player.model, -xoffset, rolling_up);
+        playerMesh.model = glMatrix.mat4.rotate(playerMesh.model, playerMesh.model, -xoffset, rolling_up);
 
         pitch += yoffset;
         if (constrain_pitch) {
@@ -222,7 +222,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             }
         }
         yoffset = deg2rad(yoffset);
-        player.model = glMatrix.mat4.rotate(player.model, player.model, yoffset, rolling_right);
+        playerMesh.model = glMatrix.mat4.rotate(playerMesh.model, playerMesh.model, yoffset, rolling_right);
         
         update_camera_vectors();
     }
@@ -286,7 +286,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     }
 
     function show_model_html(tag) {
-        show_mat(tag, 'Model', player.model);
+        show_mat(tag, 'Model', playerMesh.model);
     };
 
     function fl(x) {
@@ -303,7 +303,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
       };
 
     return {
-        player: player,
+        playerMesh: playerMesh,
         place_player: place_player,
         draw_player: draw_player,
         get_view_matrix: get_view_matrix,
