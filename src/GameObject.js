@@ -15,7 +15,7 @@ class GameObject {
     }
 
     async make(gl){
-        this.mesh = await ObjectLoader.getInstance().make_object(gl, this.objectData);
+        this.mesh = await ObjectLoader.getInstance().make_object_texture(gl, this.objectData);
         this.mesh.model = glMatrix.mat4.translate(this.mesh.model,this.mesh.model,
                     glMatrix.vec3.fromValues(this.x, this.y, this.z));
     }

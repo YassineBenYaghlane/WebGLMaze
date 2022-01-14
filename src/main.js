@@ -12,6 +12,7 @@ async function main() {
     var shader_show_object = make_shader(gl, "normal");
     var shader_cubemap = make_shader(gl, "cubemap");
     var shader_reflexion = make_shader(gl, "refraction");
+    var shader_texture = make_shader(gl, "texture");
             
     // loading the object from a file
     var cubemapObject = await ObjectLoader.getInstance().getObjectData("cube");
@@ -23,8 +24,10 @@ async function main() {
     // Make the buffer and the functions to draw the object:
 
     var loader = await map_loader();
-    loader.parse_map(gl, path="../maps/map.txt");
+    loader.parse_map(gl, path="../maps/map.txt", objt_type="cube_texture");
     
+    var brick_texture = make_texture(gl, "../textures/brick.jpg");
+    var brick_normalMap = make_texture(gl, "../textures/BrickNormal.png");
 
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
     player.place_player();
@@ -71,20 +74,39 @@ async function main() {
 
         // Classic shaders for objects
 
-        shader_show_object.use();
-        var unif = shader_show_object.get_uniforms();
+        // shader_show_object.use();
+        // var unif = shader_show_object.get_uniforms();
         
-        gl.uniformMatrix4fv(unif['view'], false, view);
-        gl.uniformMatrix4fv(unif['proj'], false, projection);
-        // Send the light position to the shader
-        gl.uniform3fv(unif["u_light_pos"], light_pos);
-        // Add the viewer position
-        console.log(typeof( player.get_camera_position()))
-        // Set one time the camera position for all the shaders
-        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
+        // gl.uniformMatrix4fv(unif['view'], false, view);
+        // gl.uniformMatrix4fv(unif['proj'], false, projection);
+        // // Send the light position to the shader
+        // gl.uniform3fv(unif["u_light_pos"], light_pos);
+        // // Add the viewer position
+        // console.log(typeof( player.get_camera_position()))
+        // // Set one time the camera position for all the shaders
+        // gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
   
         
-        ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
+        // ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
+
+        // Texture Shader
+        shader_texture.use();
+        var unif = shader_texture.get_uniforms();
+        gl.uniformMatrix4fv(unif['view'], false, view);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+
+        gl.activeTexture(gl.TEXTURE0 + 0);
+        gl.bindTexture(gl.TEXTURE_2D, brick_texture);
+        gl.uniform1i(unif["u_texture"], 0);
+        gl.activeTexture(gl.TEXTURE0 + 1);
+        gl.bindTexture(gl.TEXTURE_2D, brick_normalMap);
+        gl.uniform1i(unif["u_normalMap"], 1);
+
+        gl.uniform3fv(unif["u_light_pos"], light_pos);
+        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
+
+        ObjectLoader.getInstance().draw_map(gl, shader_texture, unif);
+
 
         // Effect shader
         shader_reflexion.use();
@@ -92,9 +114,9 @@ async function main() {
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
 
-        gl.activeTexture(gl.TEXTURE0);
+        gl.activeTexture(gl.TEXTURE0 + 2);
         gl.bindTexture(gl.TEXTURE_2D, texCube);
-        gl.uniform1i(unif["u_cubemap"], 0);
+        gl.uniform1i(unif["u_cubemap"], 2);
 
         player.draw_player(gl, shader_reflexion, unif);
 
