@@ -1,4 +1,199 @@
-var make_shader = function (gl, vertex_shader, fragment_shader) {
+var make_shader = function (gl, name) {
+
+    const sourceV = `
+    attribute vec3 position;
+    attribute vec3 normal;
+    
+    varying vec3 v_normal;
+    varying vec3 v_frag_coord;
+    
+    uniform mat4 M;
+    uniform mat4 itM;  // inverse transpose model!
+    uniform mat4 V;
+    uniform mat4 P;
+    
+    void main() {
+    vec4 frag_coord = M*vec4(position, 1.0);
+    gl_Position = P*V*frag_coord;
+    
+    // Transform correctly the normals!
+    v_normal = vec3(itM * vec4(normal, 1.0));
+    
+    v_frag_coord = frag_coord.xyz;
+    
+    // We will display the normals as a color
+    //v_color = (normal + 1.0) / 2.0;
+    }
+    `;
+    
+        const sourceF = `
+        precision mediump float;
+        varying vec3 v_normal;
+        varying vec3 v_frag_coord;
+        
+        uniform vec3 u_light_pos;
+        uniform vec3 u_view_dir;
+    
+        void main() {
+          vec3 normal = normalize(v_normal);
+          
+          // light color
+          vec3 light_color = vec3(0.9, 0.3, 0.4);
+          
+          // Ambient
+          float ambient = 0.1;
+          
+          vec3 L = normalize(u_light_pos - v_frag_coord);
+          
+          // Diffuse
+          float diffusion = max(0.0, dot(v_normal, L));
+          
+          // specural
+          float spec_strength = 0.8;
+          vec3 view_dir = normalize(u_view_dir - v_frag_coord);
+          vec3 reflect_dir = reflect(-L, normal);
+          float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+          float specular = spec_strength * spec;
+    
+          vec3 color = (ambient + specular + diffusion) * light_color;
+          gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+    
+                const sourceCubemapV = `
+          attribute vec3 position;
+          attribute vec2 texcoord;
+          attribute vec3 normal;
+          varying vec3 v_texcoord;
+          
+          uniform mat4 M;
+          uniform mat4 itM;  // inverse transpose model!
+          uniform mat4 V;
+          uniform mat4 P;
+    
+          // If you look at internet, different and maybe better ways
+          // exist to define a skybox/environmental map/cubemap ;)
+          // here it is defined like this only for convenience
+          void main() {
+            // we do NOT multiply by the model as
+            // the cubemap should not move with the camera!
+            // We keep only the rotation from the View matrix
+            mat3 Vrotation = mat3(V);
+            vec4 frag_coord = vec4(position, 1.0);
+            // the positions xyz are divided by w after the vertex shader
+            // the z component is equal to the depth value
+            // we want a z always equal to 1.0 here, so we set z = w!
+            // Remember: z=1.0 is the MAXIMUM depth value ;)
+            // When we will have other objects, we need to change the
+            // depth evaluation function (see next exercise)
+            gl_Position = (P*mat4(Vrotation)*frag_coord).xyww;
+            
+            // We set the texture coordinates accordingly
+            // to the position!
+            v_texcoord = frag_coord.xyz;
+          }
+        `;
+    
+                const sourceCubemapF = `
+          precision mediump float;
+          varying vec3 v_texcoord;
+          
+          // We have a samplerCube this time! not a 2D texture
+          uniform samplerCube u_cubemap;
+    
+          void main() {
+            //gl_FragColor = texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
+            // We sample the cube at the position of the vertices!
+            gl_FragColor = textureCube(u_cubemap, v_texcoord);
+          }
+        `;
+    
+        const sourceReflexionV = `
+        attribute vec3 position;
+        attribute vec2 texcoord;
+        attribute vec3 normal;
+        
+        varying vec3 v_normal;
+        varying vec3 v_frag_coord;
+        
+        uniform mat4 M;
+        uniform mat4 itM;  // inverse transpose model!
+        uniform mat4 V;
+        uniform mat4 P;
+    
+        void main() {
+          vec4 frag_coord = M*vec4(position, 1.0);
+          gl_Position = (P*V*frag_coord);
+          v_normal = vec3(itM * vec4(normal, 1.0));
+          v_frag_coord = frag_coord.xyz;
+        }
+      `;
+    
+              const sourceReflexionF = `
+        precision mediump float;
+        
+        varying vec3 v_normal;
+        varying vec3 v_frag_coord;
+        
+        // We need the camera position to display a reflection/refraction!
+        uniform vec3 u_view_dir;
+        // This time We need the cubemap to display a reflection/refraction!
+        uniform samplerCube u_cubemap;
+    
+        void main() {
+          vec3 I = normalize(v_frag_coord - u_view_dir);
+          vec3 R = reflect(I, normalize(v_normal));
+          gl_FragColor = vec4(textureCube(u_cubemap, R).rgb, 1.0);
+        }
+      `;
+      const sourceRefractionV = `
+      attribute vec3 position;
+      attribute vec2 texcoord;
+      attribute vec3 normal;
+      
+      varying vec3 v_normal;
+      varying vec3 v_frag_coord;
+      
+      uniform mat4 M;
+      uniform mat4 itM;  // inverse transpose model!
+      uniform mat4 V;
+      uniform mat4 P;
+
+      void main() {
+        vec4 frag_coord = M*vec4(position, 1.0);
+        gl_Position = (P*V*frag_coord);
+        v_normal = vec3(itM * vec4(normal, 1.0));
+        v_frag_coord = frag_coord.xyz;
+      }
+    `;
+
+            const sourceRefractionF = `
+      precision mediump float;
+      
+      varying vec3 v_normal;
+      varying vec3 v_frag_coord;
+      
+      // We need the camera position to display a reflection/refraction!
+      uniform vec3 u_view_dir;
+      // This time We need the cubemap to display a reflection/refraction!
+      uniform samplerCube u_cubemap;
+
+      void main() {
+        /*
+            Refraction indices:
+            Air:      1.0
+            Water:    1.33
+            Ice:      1.309
+            Glass:    1.52
+            Diamond:  2.42
+        */
+        float ratio = 1.00 / 1.52;
+        vec3 I = normalize(v_frag_coord - u_view_dir);
+        vec3 R = refract(I, normalize(v_normal), ratio);
+        gl_FragColor = vec4(textureCube(u_cubemap, R).rgb, 1.0);
+      }
+    `;
+
     function compile_shader(source, type) {
         var shader = gl.createShader(type);
         gl.shaderSource(shader, source);
@@ -30,15 +225,45 @@ var make_shader = function (gl, vertex_shader, fragment_shader) {
         const u_M = gl.getUniformLocation(program, 'M');
         const u_V = gl.getUniformLocation(program, 'V');
         const u_P = gl.getUniformLocation(program, 'P');
+        const u_light_pos = gl.getUniformLocation(program, 'u_light_pos');
+        const u_itM = gl.getUniformLocation(program, 'itM');
+        const u_view_dir = gl.getUniformLocation(program, 'u_view_dir');
+        const u_cubemap = gl.getUniformLocation(program, 'u_cubemap');
         return {
             "model": u_M,
             "view": u_V,
             "proj": u_P,
+            "u_light_pos": u_light_pos,
+            "itM": u_itM,
+            "u_view_dir": u_view_dir,
+            "u_cubemap": u_cubemap,
         }
     }
     
     function use() {
         gl.useProgram(program);
+    }
+
+    switch(name){
+        case "normal":
+            vertex_shader = sourceV;
+            fragment_shader = sourceF;
+            break;
+        case "cubemap":
+            vertex_shader = sourceCubemapV;
+            fragment_shader = sourceCubemapF;
+            break;
+        case "reflexion":
+            vertex_shader = sourceReflexionV;
+            fragment_shader = sourceReflexionF;
+            break;
+        case "refraction":
+            vertex_shader = sourceRefractionV;
+            fragment_shader = sourceRefractionF;
+            break;
+        default:
+            console.log("Wrong shader type");
+            break;
     }
     
     const shaderV = compile_shader(vertex_shader, gl.VERTEX_SHADER);
