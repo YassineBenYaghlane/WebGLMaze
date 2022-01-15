@@ -23,7 +23,7 @@ var map_loader = async function() {
                 var char = line[j];
                 switch(char){
                     case 'W':
-                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "brick2");
+                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "key", "brick2");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);

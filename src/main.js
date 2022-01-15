@@ -13,6 +13,7 @@ async function main() {
     var shader_cubemap = make_shader(gl, "cubemap");
     var shader_reflexion = make_shader(gl, "refraction");
     var shader_texture = make_shader(gl, "texture");
+    var shader_key = make_shader(gl, "key");
 
     ObjectLoader.getInstance().init(gl);
             
@@ -36,19 +37,28 @@ async function main() {
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 
     // We define a light in space and retrieve its ID in the shader
-    const light_pos = glMatrix.vec3.fromValues(0.0, 2.0, -10.0);
+    //var key = ObjectLoader.getInstance().getKeys()[2];
+    var light_pos = glMatrix.vec3.fromValues(0.0, 10.0, 0.0);
+    var light_pos2 = glMatrix.vec3.fromValues(-2.0, -1.0, 6.0);
+    var light_color2 = glMatrix.vec3.fromValues(1.0, 0.84, 0.0);
+    
+    //console.log("LIGHT");
+    console.log(ObjectLoader.getInstance().getKeys());
 
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
 
     // Retrieve the adress of the cubemap texture
-    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/fortnite');
+    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/twilight_sky');
 
     function animate(time) {
         //Draw loop
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
+        //light_pos = glMatrix.vec3.fromValues(0.0, 10.0, 5.0 + 5.0*Math.sin(0.005 * time));
+        var factor = (0.5 + 0.5 * Math.sin(0.005 * time));
+        light_color2 = glMatrix.vec3.fromValues(factor * 1.0, factor * 0.84, 0.0);
+
         ObjectLoader.getInstance().animate(time);
 
         view = player.get_view_matrix();
@@ -88,7 +98,7 @@ async function main() {
   
         ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
 
-        // Texture Shader
+        // Texture shader
         shader_texture.use();
         var unif = shader_texture.get_uniforms();
         gl.uniformMatrix4fv(unif['view'], false, view);
@@ -99,6 +109,20 @@ async function main() {
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
 
         ObjectLoader.getInstance().draw_map(gl, shader_texture, unif);
+        
+        //key shader
+        shader_key.use();
+        var unif = shader_key.get_uniforms();
+        gl.uniformMatrix4fv(unif['view'], false, view);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+
+
+        gl.uniform3fv(unif["u_light_pos"], light_pos);
+        gl.uniform3fv(unif["u_light_pos2"], light_pos2);
+        gl.uniform3fv(unif["u_light_color2"], light_color2);
+        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
+
+        ObjectLoader.getInstance().draw_map(gl, shader_key, unif);
 
 
         // Effect shader
