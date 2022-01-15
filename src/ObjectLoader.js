@@ -29,6 +29,8 @@ var ObjectLoader = (function() {
             "floorNormalMap": make_texture(this.gl, "../textures/floorNormalMap.png"),
             "gold": make_texture(this.gl, "../textures/gold.jpg"),
             "goldNormalMap": make_texture(this.gl, "../textures/goldNormalMap.png"),
+            "metal": make_texture(this.gl, "../textures/metal.jpg"),
+            "metalNormalMap": make_texture(this.gl, "../textures/metalNormalMap.png"),
             };
         }
 

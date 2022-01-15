@@ -26,26 +26,29 @@ var map_loader = async function() {
                         var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "brick2");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
-                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await plan.make(gl);
-                        ObjectLoader.getInstance().addObject(plan);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
                         break;
                     case 'S':
                         start_position = [(-j) * obj_width, -0.90, (height - i) * obj_depth];
-                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await plan.make(gl);
-                        ObjectLoader.getInstance().addObject(plan);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
                         break;
                     case 'F':
                         end_position = [(-j) * obj_width, 0.0, (height - i) * obj_depth];
-                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await plan.make(gl);
-                        ObjectLoader.getInstance().addObject(plan);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
+                        var roof = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
+                        await roof.make(gl);
+                        ObjectLoader.getInstance().addObject(roof);
                         break;
                     case ' ':
-                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await plan.make(gl);
-                        ObjectLoader.getInstance().addObject(plan);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
                         break;
                     case 'C':
                         var go = new GameObject(obj_type, 0.0, 0.0, 0.0, "texture");
@@ -53,9 +56,9 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(go);
                         break;
                     case 'K':
-                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await plan.make(gl);
-                        ObjectLoader.getInstance().addObject(plan); 
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor); 
                         var key = new Key((-j) * obj_width, -0.85, (height - i) * obj_depth);
                         await key.make(gl);
                         ObjectLoader.getInstance().addObject(key);
@@ -66,9 +69,28 @@ var map_loader = async function() {
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         ObjectLoader.getInstance().addDoor(go);
-                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await plan.make(gl);
-                        ObjectLoader.getInstance().addObject(plan);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
+                        break;
+                    case 'w':
+                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "metal");
+                        await go.make(gl);
+                        ObjectLoader.getInstance().addObject(go);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
+                        var roof = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
+                        await roof.make(gl);
+                        ObjectLoader.getInstance().addObject(roof);
+                        break;
+                    case '^':
+                        var roof = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
+                        await roof.make(gl);
+                        ObjectLoader.getInstance().addObject(roof);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
                         break;
                     default :
                         console.log("Wrong character");
