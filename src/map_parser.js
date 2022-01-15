@@ -26,9 +26,6 @@ var map_loader = async function() {
                         var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "brick2");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
-                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await floor.make(gl);
-                        ObjectLoader.getInstance().addObject(floor);
                         break;
                     case 'S':
                         start_position = [(-j) * obj_width, -0.90, (height - i) * obj_depth];
@@ -77,12 +74,6 @@ var map_loader = async function() {
                         var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "metal");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
-                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
-                        await floor.make(gl);
-                        ObjectLoader.getInstance().addObject(floor);
-                        var roof = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
-                        await roof.make(gl);
-                        ObjectLoader.getInstance().addObject(roof);
                         break;
                     case '^':
                         var roof = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
