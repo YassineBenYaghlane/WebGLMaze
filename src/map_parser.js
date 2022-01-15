@@ -26,17 +26,26 @@ var map_loader = async function() {
                         var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
-                        var plan = new Platform(y=-1.0, 2.0, 2.0);
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
                         await plan.make(gl);
                         ObjectLoader.getInstance().addObject(plan);
                         break;
                     case 'S':
                         start_position = [(-j) * obj_width, -0.8, (height - i) * obj_depth];
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case 'F':
                         end_position = [(-j) * obj_width, 0.0, (height - i) * obj_depth];
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case ' ':
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case 'C':
                         var go = new GameObject(obj_type, 0.0, 0.0, 0.0, "texture");
