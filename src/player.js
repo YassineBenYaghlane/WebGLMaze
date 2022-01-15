@@ -216,12 +216,28 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             }
         }
 
-        if(position[0] >= end_position[0] - 1.0 && position[0] <= end_position[0] + 1.0 &&
-            position[1] >= end_position[1] - 1.0 && position[1] <= end_position[1] + 1.0 &&
-            position[2] >= end_position[2] - 1.0 && position[2] <= end_position[2] + 1.0){
+        checkKey(position);
+
+        if(isAt(position, end_position)){
             console.log("FINISHED");
             
             teleport(glMatrix.vec3.fromValues(0.0, -0.8, -4.0));
+        }
+    }
+
+    function isAt(position, ref_position) {
+        return (position[0] >= ref_position[0] - 1.0 && position[0] <= ref_position[0] + 1.0 &&
+        position[1] >= ref_position[1] - 1.0 && position[1] <= ref_position[1] + 1.0 &&
+        position[2] >= ref_position[2] - 1.0 && position[2] <= ref_position[2] + 1.0);
+    }
+
+    function checkKey(position) {
+        for ( var i = 0; i < ObjectLoader.getInstance().getKeys().length; i++ ) {
+            if ( ObjectLoader.getInstance().getKeys()[i].isIn(position) ) {
+                //ObjectLoader.getInstance().getKeys()[i].setShader("normal");
+                ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getObjects(), ObjectLoader.getInstance().getKeys()[i]);
+                ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getKeys(), ObjectLoader.getInstance().getKeys()[i]);
+            }
         }
     }
 

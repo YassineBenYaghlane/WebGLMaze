@@ -49,7 +49,7 @@ async function main() {
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
-
+        ObjectLoader.getInstance().animate(time);
 
         view = player.get_view_matrix();
 
@@ -83,7 +83,6 @@ async function main() {
         // Send the light position to the shader
         gl.uniform3fv(unif["u_light_pos"], light_pos);
         // Add the viewer position
-        console.log(typeof( player.get_camera_position()))
         // Set one time the camera position for all the shaders
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
   
