@@ -75,7 +75,6 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     };
 
     function move_player() {
-        console.log(`move player called`);
         let keysPressed = {};
         document.addEventListener('keydown', (event) => {
             keysPressed[event.key] = true;

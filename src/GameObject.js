@@ -2,13 +2,15 @@ class GameObject {
     objectData = null; // données du fichier .obj loadé
     mesh = null; // apres make object
 
-    constructor(name = 'cube', x=0.0, y=0.0, z=0.0, shader="normal"){
+    constructor(name = 'cube', x=0.0, y=0.0, z=0.0, shader="normal", texture="brick2"){
         this.name = name;
         this.x = x;
         this.y = y;
         this.z = z;
         this.shader = shader;
         this.objectData = ObjectLoader.getInstance().getObjectData(name);
+        this.texture = texture;
+        this.textureNormalMap = texture + "NormalMap";
     }
 
     isObstacle(){

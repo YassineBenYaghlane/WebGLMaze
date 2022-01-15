@@ -11,13 +11,11 @@ var map_loader = async function() {
         const width = lines[0].length;
         const height = lines.length;
 
-        var plan = new Plan(y=-1.0, width*2.0, height*2.0);
-        await plan.make(gl);
-        ObjectLoader.getInstance().addObject(plan);
+        
 
-        var ceiling = new Plan(y=1.0, width*2.0, height*2.0);
-        await ceiling.make(gl);
-        ObjectLoader.getInstance().addObject(ceiling);
+        // var ceiling = new Plan(y=1.0, width*2.0, height*2.0);
+        // await ceiling.make(gl);
+        // ObjectLoader.getInstance().addObject(ceiling);
 
         for(var i = 0; i < height; i++){
             var line = lines[i];
@@ -25,17 +23,29 @@ var map_loader = async function() {
                 var char = line[j];
                 switch(char){
                     case 'W':
-                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture");
+                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "brick2");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case 'S':
                         start_position = [(-j) * obj_width, -0.8, (height - i) * obj_depth];
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case 'F':
                         end_position = [(-j) * obj_width, 0.0, (height - i) * obj_depth];
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case ' ':
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
                         break;
                     case 'C':
                         var go = new GameObject(obj_type, 0.0, 0.0, 0.0, "texture");
