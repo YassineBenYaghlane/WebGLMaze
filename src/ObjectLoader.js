@@ -365,6 +365,7 @@ var ObjectLoader = (function() {
         "cube": this.load_obj("../obj/cube.obj"),
         "sphere": this.load_obj("../obj/sphere_smooth.obj"),
         "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
+        "key": this.load_obj("../obj/key.obj"),
     };
 
     var textures = {
