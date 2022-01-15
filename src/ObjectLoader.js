@@ -5,10 +5,12 @@ var ObjectLoader = (function() {
         this.gl = null;
         this.textures = {};
         this.keys = [];
+        this.playerItemList = new Items();
+        this.doors = [];
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(meshes).includes(name)){
-                console.log(`creating ${name}`);
+                // console.log(`creating ${name}`);
                 return meshes[name];
             }
             else{
@@ -48,6 +50,18 @@ var ObjectLoader = (function() {
 
         this.addKey = function(k) {
           this.keys.push(k);
+        }
+
+        this.getPlayerItemList = function() {
+          return this.playerItemList;
+        }
+
+        this.getDoors = function() {
+          return this.doors;
+        }
+
+        this.addDoor = function(d) {
+          this.doors.push(d);
         }
         
         this.isCollision = function(nextPos){

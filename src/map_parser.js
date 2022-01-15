@@ -61,6 +61,15 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(key);
                         ObjectLoader.getInstance().addKey(key);
                         break;
+                    case 'D':
+                        var go = new Door((-j) * obj_width, 0.0, (height - i) * obj_depth);
+                        await go.make(gl);
+                        ObjectLoader.getInstance().addObject(go);
+                        ObjectLoader.getInstance().addDoor(go);
+                        var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await plan.make(gl);
+                        ObjectLoader.getInstance().addObject(plan);
+                        break;
                     default :
                         console.log("Wrong character");
                 }

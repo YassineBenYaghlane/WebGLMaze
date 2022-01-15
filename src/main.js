@@ -36,8 +36,9 @@ async function main() {
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
 
     // We define a light in space and retrieve its ID in the shader
-    const light_pos = glMatrix.vec3.fromValues(0.0, 2.0, -10.0);
+    const light_pos = glMatrix.vec3.fromValues(0.0, 5.0, 0.0);
 
+    const itemElem = document.querySelector("#Keys");
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
 
@@ -114,8 +115,9 @@ async function main() {
         player.draw_player(gl, shader_reflexion, unif);
 
         // Print Infos
-        player.show_view_html(camMatElem, view);
-        player.show_model_html(projMatElem);
+        ObjectLoader.getInstance().getPlayerItemList().displayKeys(itemElem);
+        // player.show_view_html(camMatElem, view);
+        // player.show_model_html(projMatElem);
         fps(time);
         window.requestAnimationFrame(animate); // While(True) loop!
     }

@@ -47,4 +47,8 @@ class GameObject {
     }
 
     animate(t){}
+
+    setAnimation(b) {
+        this.animation = b;
+    };
 }
