@@ -367,6 +367,12 @@ var ObjectLoader = (function() {
         "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
     };
 
+    var textures = {
+      "cube": make_texture("../obj/cube.obj"),
+      "sphere": this.load_obj("../obj/sphere_smooth.obj"),
+      "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
+  };
+
     
 
     console.log(`meshes : ${Object.keys(meshes)}`);
