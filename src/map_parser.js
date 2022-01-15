@@ -53,13 +53,14 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(go);
                         break;
                     case 'K':
-                        console.log('K');
                         var plan = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
                         await plan.make(gl);
                         ObjectLoader.getInstance().addObject(plan); 
                         var key = new Key((-j) * obj_width, -0.8, (height - i) * obj_depth);
                         await key.make(gl);
-                        ObjectLoader.getInstance().addObject(key); 
+                        ObjectLoader.getInstance().addObject(key);
+                        ObjectLoader.getInstance().addKey(key);
+                        break;
                     default :
                         console.log("Wrong character");
                 }

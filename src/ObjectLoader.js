@@ -4,6 +4,7 @@ var ObjectLoader = (function() {
         this.objects = [];
         this.gl = null;
         this.textures = {};
+        this.keys = [];
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(meshes).includes(name)){
@@ -23,7 +24,9 @@ var ObjectLoader = (function() {
             "brick2": make_texture(this.gl, "../textures/brick2.jpg"),
             "brick2NormalMap": make_texture(this.gl, "../textures/brick2NormalMap.png"),
             "floor": make_texture(this.gl, "../textures/floor.jpg"),
-            "floorNormalMap": make_texture(this.gl, "../textures/floorNormalMap.png")
+            "floorNormalMap": make_texture(this.gl, "../textures/floorNormalMap.png"),
+            "gold": make_texture(this.gl, "../textures/gold.jpg"),
+            "goldNormalMap": make_texture(this.gl, "../textures/goldNormalMap.png"),
             };
         }
 
@@ -37,6 +40,14 @@ var ObjectLoader = (function() {
 
         this.getTextures = function(){
           return textures;
+        }
+
+        this.getKeys = function(){
+          return this.keys;
+        }
+
+        this.addKey = function(k) {
+          this.keys.push(k);
         }
         
         this.isCollision = function(nextPos){
@@ -381,19 +392,24 @@ var ObjectLoader = (function() {
         draw: draw,
     }
 
-}
+  }
 
     var meshes = {
         "cube": this.load_obj("../obj/cube.obj"),
         "sphere": this.load_obj("../obj/sphere_smooth.obj"),
         "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
-        "key": this.load_obj("../obj/key.obj"),
+        "key": this.load_obj_texture("../obj/key.obj"),
     };
 
-
-    
-
     console.log(`meshes : ${Object.keys(meshes)}`);
+
+    this.animate = function(t) {
+      for ( var i = 0; i < this.objects.length; i++ ) {
+        if ( this.objects[i].getAnimation() ){
+          this.objects[i].animate(t);
+        }
+      }
+    };
 	
 	}
 	
