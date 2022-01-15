@@ -2,6 +2,8 @@ var ObjectLoader = (function() {
 	var constructor = function() {
 
         this.objects = [];
+        this.gl = null;
+        this.textures = {};
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(meshes).includes(name)){
@@ -13,6 +15,18 @@ var ObjectLoader = (function() {
             }
 		}
 
+        this.init = function(gl){
+          this.gl = gl;
+          this.textures = {
+            "brick": make_texture(this.gl, "../textures/brick.jpg"),
+            "brickNormalMap": make_texture(this.gl, "../textures/brickNormalMap.png"),
+            "brick2": make_texture(this.gl, "../textures/brick2.jpg"),
+            "brick2NormalMap": make_texture(this.gl, "../textures/brick2NormalMap.png"),
+            "floor": make_texture(this.gl, "../textures/floor.jpg"),
+            "floorNormalMap": make_texture(this.gl, "../textures/floorNormalMap.png")
+            };
+        }
+
         this.addObject = function(obj) {
             this.objects.push(obj);
 		}
@@ -20,11 +34,13 @@ var ObjectLoader = (function() {
         this.getObjects = function(){
             return this.objects;
         }
+
+        this.getTextures = function(){
+          return textures;
+        }
         
         this.isCollision = function(nextPos){
-            console.log(`next pos : ${nextPos}`);
             for(var i = 0; i < this.objects.length; i++){
-                console.log(`object : ${this.objects[i].isObstacle()}`);
                 if(this.objects[i].isObstacle() && this.objects[i].isIn(nextPos)){
                   return true;
                 }
@@ -261,6 +277,12 @@ var ObjectLoader = (function() {
                     itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(this.objects[i].getWidth()/2.0, 0.01, this.objects[i].getDepth()/2.0));
                   }
                   gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
+                  gl.activeTexture(gl.TEXTURE0 + 0);
+                  gl.bindTexture(gl.TEXTURE_2D, this.textures[this.objects[i].texture]);
+                  gl.uniform1i(unif["u_texture"], 0);
+                  gl.activeTexture(gl.TEXTURE0 + 1);
+                  gl.bindTexture(gl.TEXTURE_2D, this.textures[this.objects[i].textureNormalMap]);
+                  gl.uniform1i(unif["u_normalMap"], 1);
                   this.objects[i].getMesh().draw();
               }
             };
@@ -368,11 +390,6 @@ var ObjectLoader = (function() {
         "key": this.load_obj("../obj/key.obj"),
     };
 
-    var textures = {
-      "cube": make_texture("../obj/cube.obj"),
-      "sphere": this.load_obj("../obj/sphere_smooth.obj"),
-      "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
-  };
 
     
 

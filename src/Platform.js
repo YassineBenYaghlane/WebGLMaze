@@ -1,7 +1,7 @@
 class Platform extends GameObject{
 
     constructor(x=0.0, y=0.0, z=0.0){
-        super("cube", x, y, z, "texture"); //offset since the cube object is centered on itself
+        super("cube", x, y, z, "texture", "floor"); //offset since the cube object is centered on itself
     }
 
     isObstacle(){
@@ -14,8 +14,6 @@ class Platform extends GameObject{
                     glMatrix.vec3.fromValues(this.x, this.y, this.z));
 
         this.mesh.model = glMatrix.mat4.scale(this.mesh.model,this.mesh.model, glMatrix.vec3.fromValues(1, 0.01, 1));
-        console.log("Platform");
-        console.log(this.mesh.model);
     }
 
     isIn(position){
