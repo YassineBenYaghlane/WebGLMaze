@@ -417,7 +417,6 @@ var ObjectLoader = (function() {
         "key": this.load_obj_texture("../obj/key.obj"),
     };
 
-    console.log(`meshes : ${Object.keys(meshes)}`);
 
     this.animate = function(t) {
       for ( var i = 0; i < this.objects.length; i++ ) {
