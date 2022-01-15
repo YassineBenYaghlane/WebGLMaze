@@ -18,8 +18,6 @@ class Plan extends GameObject{
                     glMatrix.vec3.fromValues(this.x, this.y, this.z));
 
         this.mesh.model = glMatrix.mat4.scale(this.mesh.model,this.mesh.model, glMatrix.vec3.fromValues(this.width/2.0, 0.01, this.depth/2.0));
-        console.log("PLAN");
-        console.log(this.mesh.model);
     }
 
     isIn(position){
