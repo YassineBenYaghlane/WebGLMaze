@@ -234,7 +234,9 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     function checkKey(position) {
         for ( var i = 0; i < ObjectLoader.getInstance().getKeys().length; i++ ) {
             if ( ObjectLoader.getInstance().getKeys()[i].isIn(position) ) {
-                ObjectLoader.getInstance().getKeys()[i].setShader("normal");
+                //ObjectLoader.getInstance().getKeys()[i].setShader("normal");
+                ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getObjects(), ObjectLoader.getInstance().getKeys()[i]);
+                ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getKeys(), ObjectLoader.getInstance().getKeys()[i]);
             }
         }
     }

@@ -410,6 +410,10 @@ var ObjectLoader = (function() {
         }
       }
     };
+
+    this.remove = function(array, o) {
+      array.splice(array.indexOf(o), 1);
+    };
 	
 	}
 	
