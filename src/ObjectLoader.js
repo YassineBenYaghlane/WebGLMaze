@@ -9,6 +9,7 @@ var ObjectLoader = (function() {
         this.playerItemList = new Items();
         this.doors = [];
         this.lights = [];
+        this.maze = 1;
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(this.meshes).includes(name)){
@@ -81,6 +82,19 @@ var ObjectLoader = (function() {
         this.addDoor = function(d) {
           this.doors.push(d);
         }
+
+        this.changeMaze = function(){
+          if(this.maze == 1){
+            this.maze = 2;
+            this.lights[0].setOn(0.0);
+            this.lights[1].setOn(1.0);
+          }
+          else{
+            this.maze = 1
+            this.lights[0].setOn(1.0);
+            this.lights[1].setOn(0.0);
+          }
+        };
         
         this.isCollision = function(nextPos){
             for(var i = 0; i < this.objects.length; i++){
@@ -124,15 +138,25 @@ var ObjectLoader = (function() {
               spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
               specular = spec_strength * spec;
               `;
-            if(i>0){
+            if(i==0){
+              out += `att = 1.0;`;
+            } 
+            else if(i==1) {
+              out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 1.0)));`;
+            }
+            else {
               out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 2.0)));`;
+            }
+            if(i==1){
+              out += `
+              color += (ambient + specular + 2.0*diffusion) * u_light_color${i} * att * 0.4;
+            }`
             } 
             else {
-              out += `att = 1.0;`;
-            }
-            out += `
+              out += `
               color += (ambient + specular + diffusion) * u_light_color${i} * att;
-            }`
+            }`;
+            }
           }
           return out;
         }

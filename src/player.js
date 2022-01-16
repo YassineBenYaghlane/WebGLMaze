@@ -216,8 +216,15 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             }
         }
 
+        ObjectLoader.getInstance().getLights()[1].setPosition(position);
+
         checkKey(position);
         checkDoor(position);
+        
+        if(isAt(position, glMatrix.vec3.fromValues(-8.0, 0.0, 22.0))){
+            console.log("CHANGE MAZE");
+            ObjectLoader.getInstance().changeMaze();
+        }
 
         if(isAt(position, end_position)){
             console.log("FINISHED");

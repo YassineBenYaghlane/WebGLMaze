@@ -1,6 +1,6 @@
 var map_loader = async function() {
 
-    var start_position = [0.0, 0.0, 0.0];
+    var start_position = [0.0, -0.0, 0.0];
     var end_position = [0.0, 0.0, 0.0];
     
     async function parse_map(gl, path="../maps/map.txt", obj_type="cube", obj_width=2, obj_height=2, obj_depth=2) {
@@ -13,6 +13,10 @@ var map_loader = async function() {
         var light_counter = 0;
         
         var light = new Light(light_counter, 0.0, 5.0, 0.0, glMatrix.vec3.fromValues(1.0, 0.74, 0.74), false);
+        light_counter++;
+        ObjectLoader.getInstance().addLight(light);
+        light = new Light(light_counter, start_position[0], start_position[1], start_position[2], glMatrix.vec3.fromValues(0.5, 0.5, 0.5), true);
+        light.setOn(0.0);
         light_counter++;
         ObjectLoader.getInstance().addLight(light);
 
@@ -31,6 +35,7 @@ var map_loader = async function() {
                         var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
                         await floor.make(gl);
                         ObjectLoader.getInstance().addObject(floor);
+                        ObjectLoader.getInstance().getLights()[1].setPosition(start_position);
                         break;
                     case 'F':
                         end_position = [(-j) * obj_width, 0.0, (height - i) * obj_depth];
@@ -82,6 +87,15 @@ var map_loader = async function() {
                         break;
                     case 'D':
                         var go = new Door((-j) * obj_width, 0.0, (height - i) * obj_depth);
+                        await go.make(gl);
+                        ObjectLoader.getInstance().addObject(go);
+                        ObjectLoader.getInstance().addDoor(go);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor);
+                        break;
+                    case 'd':
+                        var go = new Door((-j) * obj_width, 0.0, (height - i) * obj_depth, "metal");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         ObjectLoader.getInstance().addDoor(go);

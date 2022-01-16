@@ -51,7 +51,7 @@ class Light {
 
     animate(t){
         if(this.animation){
-            var factor = (0.5 + 0.5 * Math.sin(0.002 * t));
+            var factor = (0.65 + 0.35 * Math.sin(0.002 * t));
             this.currentColor = glMatrix.vec3.fromValues(factor * this.color[0], factor * this.color[1], factor * this.color[2]);
         }
     }

@@ -1,7 +1,7 @@
 class Door extends GameObject{
 
-    constructor(x=0.0, y=0.0, z=0.0){
-        super("cube_texture", x, y, z, "multi_light", "brick2", false);
+    constructor(x=0.0, y=0.0, z=0.0, texture="brick2"){
+        super("cube_texture", x, y, z, "multi_light", texture, false);
     }
 
     isObstacle(){
