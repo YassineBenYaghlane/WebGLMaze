@@ -1,7 +1,10 @@
 class Key extends GameObject{
+    
+
 
     constructor(x=0.0, y=0.0, z=0.0){
         super("key", x, y, z, "texture", "gold", true);
+        this.light = undefined;
     }
 
     isObstacle(){
@@ -20,6 +23,14 @@ class Key extends GameObject{
 
     getMesh(){
         return this.mesh;
+    }
+
+    getLight(){
+        return this.light;
+    }
+
+    setLight(light){
+        this.light = light;
     }
 
     getWidth(){

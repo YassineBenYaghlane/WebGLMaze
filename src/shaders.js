@@ -54,7 +54,7 @@ var make_shader = function (gl, name) {
           vec3 reflect_dir = reflect(-L, normal);
           float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
           float specular = spec_strength * spec;
-    
+
           vec3 color = (ambient + specular + diffusion) * light_color;
           gl_FragColor = vec4(color, 1.0);
         }
@@ -247,7 +247,7 @@ var make_shader = function (gl, name) {
         vec3 light_color = vec3(1.0, 1.0, 1.0);
         
         // Ambient
-        float ambient = 0.1;
+        float ambient = 1.0;
         
         vec3 L = normalize(u_light_pos - v_frag_coord);
         
@@ -261,10 +261,80 @@ var make_shader = function (gl, name) {
         float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
         float specular = spec_strength * spec;
 
-        vec3 color = (ambient + specular + diffusion) * light_color;
+        vec3 color = (ambient ) * light_color;
         gl_FragColor = vec4(color, 1.0) * texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
       }
     `;
+
+    const sourceVMultiLight = `
+      attribute vec3 position;
+      attribute vec2 texcoord;
+      attribute vec3 normal;
+      attribute vec3 tangent;
+      attribute vec3 bitangent;
+
+      varying vec2 v_texcoord;
+      varying vec3 v_frag_coord;
+      varying mat3 TBN;
+      
+      uniform mat4 M;
+      uniform mat4 V;
+      uniform mat4 P;
+      
+      void main() {
+        vec4 frag_coord = M*vec4(position, 1.0);
+        gl_Position = P*V*frag_coord;
+
+        v_frag_coord = frag_coord.xyz;
+        v_texcoord = texcoord;
+
+        vec3 T = normalize(vec3(M * vec4(tangent,   0.0)));
+        vec3 N = normalize(vec3(M * vec4(normal,    0.0)));
+
+        T = normalize(T - dot(T, N) * N);
+
+        vec3 B = cross(N, T);
+
+        TBN = mat3(T, B, N);
+      }
+    `;
+
+            const sourceFMultiLight = `
+      precision mediump float;
+      varying vec3 v_frag_coord;
+      varying vec2 v_texcoord;
+      varying mat3 TBN;
+      
+      uniform sampler2D u_texture;
+      uniform sampler2D u_normalMap;
+      uniform vec3 u_view_dir;`
+      + ObjectLoader.getInstance().generateLightStringInit()
+      + `
+      void main() {
+        vec3 normal = texture2D(u_normalMap, vec2(v_texcoord.x, 1.0-v_texcoord.y)).rgb;
+        normal = normal * 2.0 - 1.0;   
+        normal = normalize(TBN * normal);
+        float spec_strength = 0.8;
+        float ambient = 0.1;
+        vec3 L;
+        float diffusion;
+        vec3 view_dir;
+        float spec;
+        float specular;
+        float att;
+        vec3 reflect_dir;
+        vec3 color;
+        vec3 light_color;
+      `
+      + ObjectLoader.getInstance().generateLightStringBoolParse()
+      + ObjectLoader.getInstance().generateLightStringComputation()
+      +`
+        gl_FragColor = vec4(color, 1.0) * texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
+      }
+    `;
+
+    //console.log(sourceFMultiLight);
+
 
     function compile_shader(source, type) {
         var shader = gl.createShader(type);
@@ -298,6 +368,8 @@ var make_shader = function (gl, name) {
         const u_V = gl.getUniformLocation(program, 'V');
         const u_P = gl.getUniformLocation(program, 'P');
         const u_light_pos = gl.getUniformLocation(program, 'u_light_pos');
+        const u_light_pos2 = gl.getUniformLocation(program, 'u_light_pos2');
+        const u_light_color2 = gl.getUniformLocation(program, 'u_light_color2');
         const u_itM = gl.getUniformLocation(program, 'itM');
         const u_view_dir = gl.getUniformLocation(program, 'u_view_dir');
         const u_cubemap = gl.getUniformLocation(program, 'u_cubemap');
@@ -308,6 +380,8 @@ var make_shader = function (gl, name) {
             "view": u_V,
             "proj": u_P,
             "u_light_pos": u_light_pos,
+            "u_light_pos2": u_light_pos2,
+            "u_light_color2":u_light_color2,
             "itM": u_itM,
             "u_view_dir": u_view_dir,
             "u_cubemap": u_cubemap,
@@ -340,6 +414,10 @@ var make_shader = function (gl, name) {
         case "texture":
           vertex_shader = sourceV_texture;
           fragment_shader = sourceF_texture;
+          break;
+        case "multi_light":
+        vertex_shader = sourceVMultiLight;
+        fragment_shader = sourceFMultiLight;
           break;
         default:
             console.log("Wrong shader type");
