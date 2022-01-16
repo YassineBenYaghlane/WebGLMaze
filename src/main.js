@@ -120,6 +120,7 @@ async function main() {
 
 
         // Effect shader
+        gl.depthFunc(gl.LEQUAL);
         shader_reflexion.use();
         var unif = shader_reflexion.get_uniforms();
         gl.uniformMatrix4fv(unif['view'], false, view);
@@ -130,6 +131,8 @@ async function main() {
         gl.uniform1i(unif["u_cubemap"], 0);
 
         player.draw_player(gl, shader_reflexion, unif);
+
+        gl.depthFunc(gl.LESS);
 
         // Print Infos
         ObjectLoader.getInstance().getPlayerItemList().displayKeys(itemElem);
