@@ -1,7 +1,7 @@
 class Door extends GameObject{
 
     constructor(x=0.0, y=0.0, z=0.0){
-        super("cube_texture", x, y, z, "texture", "brick2", false);
+        super("cube_texture", x, y, z, "multi_light", "brick2", false);
     }
 
     isObstacle(){
@@ -30,7 +30,6 @@ class Door extends GameObject{
         if ( this.y > -3.1 ) {
             this.mesh.model = glMatrix.mat4.translate(this.mesh.model, this.mesh.model, glMatrix.vec3.fromValues(0.0, -0.01, 0.0));
             this.y -= 0.01;
-            console.log('down');
         }
         else {
             ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getObjects(), this);

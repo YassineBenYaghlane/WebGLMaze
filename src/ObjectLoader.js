@@ -4,14 +4,16 @@ var ObjectLoader = (function() {
         this.objects = [];
         this.gl = null;
         this.textures = {};
+        this.meshes = {};
         this.keys = [];
         this.playerItemList = new Items();
         this.doors = [];
+        this.lights = [];
 
         this.getObjectData = function(name = 'cube') {
-            if (Object.keys(meshes).includes(name)){
+            if (Object.keys(this.meshes).includes(name)){
                 // console.log(`creating ${name}`);
-                return meshes[name];
+                return this.meshes[name];
             }
             else{
                 console.log(`object name not found : ${name}`);
@@ -32,6 +34,12 @@ var ObjectLoader = (function() {
             "metal": make_texture(this.gl, "../textures/metal.jpg"),
             "metalNormalMap": make_texture(this.gl, "../textures/metalNormalMap.png"),
             };
+          this.meshes = {
+              "cube": this.load_obj("../obj/cube.obj"),
+              "sphere": this.load_obj("../obj/sphere_smooth.obj"),
+              "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
+              "key": this.load_obj_texture("../obj/key.obj"),
+          };
         }
 
         this.addObject = function(obj) {
@@ -41,6 +49,14 @@ var ObjectLoader = (function() {
         this.getObjects = function(){
             return this.objects;
         }
+
+        this.addLight = function(light) {
+          this.lights.push(light);
+        }
+
+        this.getLights = function(){
+          return this.lights;
+      }
 
         this.getTextures = function(){
           return textures;
@@ -74,6 +90,51 @@ var ObjectLoader = (function() {
                 //if(this.collide(nextPos, ))
             }
             return false;
+        }
+
+        this.generateLightStringInit = function(){
+          out = ``;
+          for(var i = 0; i < this.lights.length; i++){
+            out += `
+            uniform vec4 u_light_pos${i};
+            uniform vec3 u_light_color${i};`
+          }
+          return out;
+        }
+
+        this.generateLightStringBoolParse = function(){
+          out = ``;
+          for(var i = 0; i < this.lights.length; i++){
+            out += `
+            vec3 light_pos${i} = u_light_pos${i}.xyz;
+            float bool${i} = u_light_pos${i}.w;`
+          }
+          return out;
+        }
+
+        this.generateLightStringComputation = function(){
+          out = ``;
+          for(var i = 0; i < this.lights.length; i++){
+            out += `
+            if(bool${i} == 1.0){
+              L = normalize(light_pos${i} - v_frag_coord);
+              diffusion = max(0.0, dot(normal, L));
+              view_dir = normalize(u_view_dir - v_frag_coord);
+              reflect_dir = reflect(-L, normal);
+              spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+              specular = spec_strength * spec;
+              `;
+            if(i>0){
+              out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 2.0)));`;
+            } 
+            else {
+              out += `att = 1.0;`;
+            }
+            out += `
+              color += (ambient + specular + diffusion) * u_light_color${i} * att;
+            }`
+          }
+          return out;
         }
 
 		this.load_obj = async function(name = '../obj/cube.obj') {
@@ -410,18 +471,15 @@ var ObjectLoader = (function() {
 
   }
 
-    var meshes = {
-        "cube": this.load_obj("../obj/cube.obj"),
-        "sphere": this.load_obj("../obj/sphere_smooth.obj"),
-        "cube_texture": this.load_obj_texture("../obj/cube_texture.obj"),
-        "key": this.load_obj_texture("../obj/key.obj"),
-    };
-
-
     this.animate = function(t) {
       for ( var i = 0; i < this.objects.length; i++ ) {
         if ( this.objects[i].getAnimation() ){
           this.objects[i].animate(t);
+        }
+      }
+      for ( var i = 0; i < this.lights.length; i++ ) {
+        if ( this.lights[i].getOn() == 1.0 ){
+          this.lights[i].animate(t);
         }
       }
     };

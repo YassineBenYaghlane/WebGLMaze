@@ -236,6 +236,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         for ( var i = 0; i < ObjectLoader.getInstance().getKeys().length; i++ ) {
             if ( ObjectLoader.getInstance().getKeys()[i].isIn(position) ) {
                 ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getObjects(), ObjectLoader.getInstance().getKeys()[i]);
+                ObjectLoader.getInstance().getKeys()[i].getLight().setOn(0.0);
                 ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getKeys(), ObjectLoader.getInstance().getKeys()[i]);
                 ObjectLoader.getInstance().getPlayerItemList().addKey(ObjectLoader.getInstance().getKeys()[i]);
             }

@@ -46,6 +46,16 @@ class GameObject {
         return this.animation
     }
 
+    getPosition(){
+        return [this.x, this.y, this.z];
+    }
+
+    setPosition(position){
+        this.x = position[0];
+        this.y = position[1];
+        this.z = position[2];
+    }
+
     animate(t){}
 
     setAnimation(b) {

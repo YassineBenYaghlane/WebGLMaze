@@ -8,13 +8,7 @@ async function main() {
     // Enable tests for better rendering
     gl.enable(gl.DEPTH_TEST);
     //gl.enable(gl.CULL_FACE); // cull hidden faces behind normals!
-
-    var shader_show_object = make_shader(gl, "normal");
-    var shader_cubemap = make_shader(gl, "cubemap");
-    var shader_reflexion = make_shader(gl, "refraction");
-    var shader_texture = make_shader(gl, "texture");
-    var shader_key = make_shader(gl, "key");
-
+    
     ObjectLoader.getInstance().init(gl);
             
     // loading the object from a file
@@ -29,21 +23,18 @@ async function main() {
     var loader = await map_loader();
     await loader.parse_map(gl, path="../maps/map.txt", objt_type="cube_texture");
 
+    var shader_show_object = make_shader(gl, "normal");
+    var shader_cubemap = make_shader(gl, "cubemap");
+    var shader_reflexion = make_shader(gl, "refraction");
+    var shader_texture = make_shader(gl, "texture");
+    var shader_multi_light = make_shader(gl, "multi_light");
+
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
     player.setStartPosition(loader.getStartPosition());
     player.setEndPosition(loader.getEndPosition());
     player.place_player();
 
     var projection = player.get_projection(45.0, c_width / c_height, 0.01, 100.0);
-
-    // We define a light in space and retrieve its ID in the shader
-    //var key = ObjectLoader.getInstance().getKeys()[2];
-    var light_pos = glMatrix.vec3.fromValues(0.0, 10.0, 0.0);
-    var light_pos2 = glMatrix.vec3.fromValues(-2.0, -1.0, 6.0);
-    var light_color2 = glMatrix.vec3.fromValues(1.0, 0.84, 0.0);
-    
-    //console.log("LIGHT");
-    console.log(ObjectLoader.getInstance().getKeys());
 
     const itemElem = document.querySelector("#Keys");
     const camMatElem = document.querySelector("#camera_mat");
@@ -52,13 +43,13 @@ async function main() {
     // Retrieve the adress of the cubemap texture
     var texCube = make_texture_cubemap(gl, '../textures/cubemaps/twilight_sky');
 
+
+
+
     function animate(time) {
         //Draw loop
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        //light_pos = glMatrix.vec3.fromValues(0.0, 10.0, 5.0 + 5.0*Math.sin(0.005 * time));
-        var factor = (0.5 + 0.5 * Math.sin(0.005 * time));
-        light_color2 = glMatrix.vec3.fromValues(factor * 1.0, factor * 0.84, 0.0);
 
         ObjectLoader.getInstance().animate(time);
 
@@ -92,7 +83,7 @@ async function main() {
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
         // Send the light position to the shader
-        gl.uniform3fv(unif["u_light_pos"], light_pos);
+        gl.uniform3fv(unif["u_light_pos"], ObjectLoader.getInstance().getLights()[0].getPosVec3());
         // Add the viewer position
         // Set one time the camera position for all the shaders
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
@@ -106,24 +97,26 @@ async function main() {
         gl.uniformMatrix4fv(unif['proj'], false, projection);
 
 
-        gl.uniform3fv(unif["u_light_pos"], light_pos);
+        gl.uniform3fv(unif["u_light_pos"], ObjectLoader.getInstance().getLights()[0].getPosVec3());
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
 
         ObjectLoader.getInstance().draw_map(gl, shader_texture, unif);
         
-        //key shader
-        shader_key.use();
-        var unif = shader_key.get_uniforms();
+        // Multi light shader
+        shader_multi_light.use();
+        var unif = shader_multi_light.get_uniforms();
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
 
+        for(var i = 0; i < ObjectLoader.getInstance().getLights().length; i++){
+            gl.uniform4fv(gl.getUniformLocation(shader_multi_light.program, `u_light_pos${i}`), ObjectLoader.getInstance().getLights()[i].getPosVec4());
 
-        gl.uniform3fv(unif["u_light_pos"], light_pos);
-        gl.uniform3fv(unif["u_light_pos2"], light_pos2);
-        gl.uniform3fv(unif["u_light_color2"], light_color2);
+            gl.uniform3fv(gl.getUniformLocation(shader_multi_light.program, `u_light_color${i}`), ObjectLoader.getInstance().getLights()[i].getCurrentColor());
+        }
+
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
 
-        ObjectLoader.getInstance().draw_map(gl, shader_key, unif);
+        ObjectLoader.getInstance().draw_map(gl, shader_multi_light, unif);
 
 
         // Effect shader
@@ -140,8 +133,8 @@ async function main() {
 
         // Print Infos
         ObjectLoader.getInstance().getPlayerItemList().displayKeys(itemElem);
-        // player.show_view_html(camMatElem, view);
-        // player.show_model_html(projMatElem);
+        player.show_view_html(camMatElem, view);
+        player.show_model_html(projMatElem);
         fps(time);
         window.requestAnimationFrame(animate); // While(True) loop!
     }

@@ -266,7 +266,7 @@ var make_shader = function (gl, name) {
       }
     `;
 
-    const sourceVKey = `
+    const sourceVMultiLight = `
       attribute vec3 position;
       attribute vec2 texcoord;
       attribute vec3 normal;
@@ -299,7 +299,7 @@ var make_shader = function (gl, name) {
       }
     `;
 
-            const sourceFKey = `
+            const sourceFMultiLight = `
       precision mediump float;
       varying vec3 v_frag_coord;
       varying vec2 v_texcoord;
@@ -307,45 +307,33 @@ var make_shader = function (gl, name) {
       
       uniform sampler2D u_texture;
       uniform sampler2D u_normalMap;
-      uniform vec3 u_light_pos;
-      uniform vec3 u_light_pos2;
-      uniform vec3 u_light_color2;
-      uniform vec3 u_view_dir;
-
+      uniform vec3 u_view_dir;`
+      + ObjectLoader.getInstance().generateLightStringInit()
+      + `
       void main() {
         vec3 normal = texture2D(u_normalMap, vec2(v_texcoord.x, 1.0-v_texcoord.y)).rgb;
         normal = normal * 2.0 - 1.0;   
         normal = normalize(TBN * normal);
         float spec_strength = 0.8;
         float ambient = 0.1;
-
-        // light1
-        vec3 light_color = vec3(1.0, 0.74, 0.74);
-         
-        vec3 L = normalize(u_light_pos - v_frag_coord);
-        float diffusion = max(0.0, dot(normal, L));
-        vec3 view_dir = normalize(u_view_dir - v_frag_coord);
-        vec3 reflect_dir = reflect(-L, normal);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
-        float specular = spec_strength * spec;
-        float att = 1.0/(0.8*(pow(distance(u_light_pos, v_frag_coord), 2.0)));
-        vec3 color = (ambient + specular + diffusion) * light_color;
-
-        // light2
-        light_color = u_light_color2;
-        L = normalize(u_light_pos2 - v_frag_coord);
-        diffusion = max(0.0, dot(normal, L));
-        view_dir = normalize(u_view_dir - v_frag_coord);
-        reflect_dir = reflect(-L, normal);
-        spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
-        specular = spec_strength * spec;
-        att = 1.0/(0.4*(pow(distance(u_light_pos2, v_frag_coord), 2.0)));
-        color += (ambient + specular + diffusion) * light_color * 0.5 * att;
-
+        vec3 L;
+        float diffusion;
+        vec3 view_dir;
+        float spec;
+        float specular;
+        float att;
+        vec3 reflect_dir;
+        vec3 color;
+        vec3 light_color;
+      `
+      + ObjectLoader.getInstance().generateLightStringBoolParse()
+      + ObjectLoader.getInstance().generateLightStringComputation()
+      +`
         gl_FragColor = vec4(color, 1.0) * texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
-
       }
     `;
+
+    //console.log(sourceFMultiLight);
 
 
     function compile_shader(source, type) {
@@ -427,9 +415,9 @@ var make_shader = function (gl, name) {
           vertex_shader = sourceV_texture;
           fragment_shader = sourceF_texture;
           break;
-        case "key":
-        vertex_shader = sourceVKey;
-        fragment_shader = sourceFKey;
+        case "multi_light":
+        vertex_shader = sourceVMultiLight;
+        fragment_shader = sourceFMultiLight;
           break;
         default:
             console.log("Wrong shader type");

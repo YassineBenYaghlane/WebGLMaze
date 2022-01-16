@@ -10,12 +10,11 @@ var map_loader = async function() {
         var lines = text.split("\n");
         const width = lines[0].length;
         const height = lines.length;
-
+        var light_counter = 0;
         
-
-        // var ceiling = new Plan(y=1.0, width*2.0, height*2.0);
-        // await ceiling.make(gl);
-        // ObjectLoader.getInstance().addObject(ceiling);
+        var light = new Light(light_counter, 0.0, 5.0, 0.0, glMatrix.vec3.fromValues(1.0, 0.74, 0.74), false);
+        light_counter++;
+        ObjectLoader.getInstance().addLight(light);
 
         for(var i = 0; i < height; i++){
             var line = lines[i];
@@ -23,7 +22,7 @@ var map_loader = async function() {
                 var char = line[j];
                 switch(char){
                     case 'W':
-                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "key", "brick2");
+                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "multi_light", "brick2");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         break;
@@ -58,8 +57,28 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(floor); 
                         var key = new Key((-j) * obj_width, -0.85, (height - i) * obj_depth);
                         await key.make(gl);
+                        var light = new Light(light_counter, (-j) * obj_width, -0.85, (height - i) * obj_depth, glMatrix.vec3.fromValues(1.0, 0.84, 0.0));
+                        light_counter++;
+                        key.setLight(light);
                         ObjectLoader.getInstance().addObject(key);
                         ObjectLoader.getInstance().addKey(key);
+                        ObjectLoader.getInstance().addLight(light);
+                        break;
+                    case 'k':
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        await floor.make(gl);
+                        ObjectLoader.getInstance().addObject(floor); 
+                        var key = new Key((-j) * obj_width, -0.85, (height - i) * obj_depth);
+                        await key.make(gl);
+                        var light = new Light(light_counter, (-j) * obj_width, -0.85, (height - i) * obj_depth, glMatrix.vec3.fromValues(1.0, 0.84, 0.0));
+                        light_counter++;
+                        key.setLight(light);
+                        var roof = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
+                        await roof.make(gl);
+                        ObjectLoader.getInstance().addObject(roof);
+                        ObjectLoader.getInstance().addObject(key);
+                        ObjectLoader.getInstance().addKey(key);
+                        ObjectLoader.getInstance().addLight(light);
                         break;
                     case 'D':
                         var go = new Door((-j) * obj_width, 0.0, (height - i) * obj_depth);
@@ -71,7 +90,7 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(floor);
                         break;
                     case 'w':
-                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "texture", "metal");
+                        var go = new GameObject(obj_type, (-j) * obj_width, 0.0, (height - i) * obj_depth, "multi_light", "metal");
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         break;
