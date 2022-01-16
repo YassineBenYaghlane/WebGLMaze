@@ -5,7 +5,7 @@ class Platform extends GameObject{
     }
 
     isObstacle(){
-        return false;
+        return true;
     }
 
     async make(gl){
@@ -17,6 +17,12 @@ class Platform extends GameObject{
     }
 
     isIn(position){
+        let player_size = 0.05;
+        if(position[0] >= this.x-1 - player_size && position[0] <= this.x+1 + player_size &&
+            position[1] >= this.y-0.03 - player_size && position[1] <= this.y+0.01 + player_size &&
+            position[2] >= this.z-1 - player_size && position[2] <= this.z+1 + player_size){
+            return true;
+        }
         return false;
     }
 

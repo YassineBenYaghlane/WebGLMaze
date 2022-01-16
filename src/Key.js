@@ -52,6 +52,7 @@ class Key extends GameObject{
     isIn(position){
         let player_size = 0.05;
         if(position[0] >= this.x-0.1 - player_size && position[0] <= this.x+0.1 + player_size
+            && position[1] >= this.y-0.4 - player_size && position[1] <= this.y+0.4 + player_size
             && position[2] >= this.z-0.1 - player_size && position[2] <= this.z+0.1 + player_size){
             return true;
         }
