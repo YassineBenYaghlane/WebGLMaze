@@ -41,7 +41,7 @@ async function main() {
     const projMatElem = document.querySelector("#proj_mat");
 
     // Retrieve the adress of the cubemap texture
-    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/twilight_sky');
+    var texCube = make_texture_cubemap(gl, '../textures/cubemaps/twilight_sky_2');
 
 
 
