@@ -31,6 +31,8 @@ var ObjectLoader = (function() {
             "brick2NormalMap": make_texture(this.gl, "../textures/brick2NormalMap.png"),
             "floor": make_texture(this.gl, "../textures/floor.jpg"),
             "floorNormalMap": make_texture(this.gl, "../textures/floorNormalMap.png"),
+            "floor2": make_texture(this.gl, "../textures/floor2.jpg"),
+            "floorNormalMap2": make_texture(this.gl, "../textures/floorNormalMap2.png"),
             "gold": make_texture(this.gl, "../textures/gold.jpg"),
             "goldNormalMap": make_texture(this.gl, "../textures/goldNormalMap.png"),
             "metal": make_texture(this.gl, "../textures/metal.jpg"),
@@ -165,7 +167,7 @@ var ObjectLoader = (function() {
             if(i==1){
               out += `
               color += (ambient + specular + 2.0*diffusion) * u_light_color${i} * att * 0.4;
-            }`
+            }`;
             } 
             else {
               out += `
