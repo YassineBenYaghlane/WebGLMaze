@@ -102,6 +102,7 @@ async function main() {
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
 
         ObjectLoader.getInstance().draw_map(gl, shader_texture, unif);
+        //player.draw_player(gl, shader_texture, unif);
         
         // Multi light shader
         shader_multi_light.use();

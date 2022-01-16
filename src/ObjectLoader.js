@@ -37,7 +37,9 @@ var ObjectLoader = (function() {
             "goldNormalMap": make_texture(this.gl, "../textures/goldNormalMap.png"),
             "metal": make_texture(this.gl, "../textures/metal.jpg"),
             "metalNormalMap": make_texture(this.gl, "../textures/metalNormalMap.png"),
-            };
+            "player": make_texture(this.gl, "../textures/player.png"),
+            "playerNormalMap": make_texture(this.gl, "../textures/playerNormalMap.png")
+          };
           this.meshes = {
               "cube": this.load_obj("../obj/cube.obj"),
               "sphere": this.load_obj("../obj/sphere_smooth.obj"),
@@ -66,7 +68,7 @@ var ObjectLoader = (function() {
         }
 
         this.getTextures = function(){
-          return textures;
+          return this.textures;
         }
 
         this.getCurrentDoor = function(){
@@ -171,7 +173,7 @@ var ObjectLoader = (function() {
             } 
             else {
               out += `
-              color += (ambient + specular + diffusion) * u_light_color${i} * att;
+              color += (ambient + specular + diffusion) * u_light_color${i} * att * 0.7;
             }`;
             }
           }

@@ -40,7 +40,7 @@ var map_loader = async function() {
                         break;
                     case 'S':
                         start_position = [(-j) * obj_width, -0.90, (height - i) * obj_depth];
-                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth, "floor2");
                         await floor.make(gl);
                         ObjectLoader.getInstance().addObject(floor);
                         ObjectLoader.getInstance().getLights()[1].setPosition(start_position);
@@ -55,7 +55,7 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(roof);
                         break;
                     case ' ':
-                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth, "floor2");
                         await floor.make(gl);
                         ObjectLoader.getInstance().addObject(floor);
                         break;
@@ -65,7 +65,7 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(go);
                         break;
                     case 'K':
-                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth);
+                        var floor = new Platform(x=(-j) * obj_width, -1.0, (height - i) * obj_depth, "floor2");
                         await floor.make(gl);
                         ObjectLoader.getInstance().addObject(floor); 
                         var key = new Key((-j) * obj_width, -0.85, (height - i) * obj_depth);
