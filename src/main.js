@@ -52,6 +52,7 @@ async function main() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         ObjectLoader.getInstance().animate(time);
+        player.animate(time);
 
         view = player.get_view_matrix();
 

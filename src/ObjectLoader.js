@@ -10,6 +10,7 @@ var ObjectLoader = (function() {
         this.doors = [];
         this.lights = [];
         this.maze = 1;
+        this.currentDoor = 0;
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(this.meshes).includes(name)){
@@ -57,10 +58,21 @@ var ObjectLoader = (function() {
 
         this.getLights = function(){
           return this.lights;
-      }
+        }
+        this.getMaze = function(){
+          return this.maze;
+        }
 
         this.getTextures = function(){
           return textures;
+        }
+
+        this.getCurrentDoor = function(){
+          return this.currentDoor;
+        }
+  
+        this.setCurrentDoor = function(a){
+            this.currentDoor = a;
         }
 
         this.getKeys = function(){
@@ -86,6 +98,9 @@ var ObjectLoader = (function() {
         this.changeMaze = function(){
           if(this.maze == 1){
             this.maze = 2;
+            this.doors[this.currentDoor].setAnimation(true);
+            this.doors[this.currentDoor].setAnimationNumber(2);
+            this.currentDoor++;
             this.lights[0].setOn(0.0);
             this.lights[1].setOn(1.0);
           }

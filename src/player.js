@@ -7,15 +7,19 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         RIGHT: 4
     }
     var canvas = canvas;
-    var position = glMatrix.vec3.fromValues(0.0, -0.8, -4.0);
+    var position = glMatrix.vec3.fromValues(0.0,  -0.90, -4.0);
     var front = glMatrix.vec3.fromValues(0, 0, 1.0);
     var up = glMatrix.vec3.fromValues(0.0, 1.0, 0.0);
     var right = glMatrix.vec3.fromValues(-1.0, 0.0, 0.0);
     var world_up = up;
-    var start_position = glMatrix.vec3.fromValues(0.0, -0.8, -4.0);
+    var start_position = glMatrix.vec3.fromValues(0.0,  -0.90, -4.0);
     var end_position = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
 
     var camera_position = glMatrix.vec3.create();
+
+    var jumping = false;
+    var startJumpTime = 0.0;
+    var startJumpPos = -0.90;
     
     var yaw = 90.0;
     var pitch = 0.0;
@@ -79,7 +83,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         document.addEventListener('keydown', (event) => {
             keysPressed[event.key] = true;
          
-            if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === ' ') {
                 event.view.event.preventDefault();
             }
             
@@ -93,6 +97,10 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
                 process_keyboard(PlayerMovement.RIGHT);
             } else if (event.key === 'r') {
                 teleport(start_position);
+            } else if (event.key === ' ') {
+                if(!jumping){
+                    jumping = true;
+                }
             }
 
 
@@ -124,41 +132,6 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             delete keysPressed[event.key];
         });
     }
-
-    // function update_rolling_axis(angle, right=true) {
-    //     if ( right ) {
-    //         tmp_right_r = glMatrix.vec3.create();
-    //         tmp_right_r = glMatrix.vec3.scale(tmp_right_r, rolling_right, Math.cos(angle));
-    //         tmp_right_u = glMatrix.vec3.create();
-    //         tmp_right_u = glMatrix.vec3.scale(tmp_right_u, rolling_up, Math.sin(angle));
-
-    //         tmp_up_r = glMatrix.vec3.create();
-    //         tmp_up_r = glMatrix.vec3.scale(tmp_up_r, rolling_right, -Math.sin(angle));
-    //         tmp_up_u = glMatrix.vec3.create();
-    //         tmp_up_u = glMatrix.vec3.scale(tmp_up_u, rolling_up, Math.cos(angle));
-
-    //         rolling_right = glMatrix.vec3.add(rolling_right, tmp_right_r, tmp_right_u);
-    //         rolling_up = glMatrix.vec3.add(rolling_up, tmp_up_r, tmp_up_u);
-    //         //rolling_front = glMatrix.vec3.cross(rolling_front, rolling_up, rolling_right);
-    //     }
-    //     else {
-    //         tmp_front_f = glMatrix.vec3.create();
-    //         tmp_front_f = glMatrix.vec3.scale(tmp_front_f, rolling_front, Math.cos(-angle));
-    //         tmp_front_u = glMatrix.vec3.create();
-    //         tmp_front_u = glMatrix.vec3.scale(tmp_front_u, rolling_up, Math.sin(-angle));
-
-    //         tmp_up_f = glMatrix.vec3.create();
-    //         tmp_up_f = glMatrix.vec3.scale(tmp_up_f, rolling_front, -Math.sin(-angle));
-    //         tmp_up_u = glMatrix.vec3.create();
-    //         tmp_up_u = glMatrix.vec3.scale(tmp_up_u, rolling_up, Math.cos(-angle));
-
-    //         rolling_front = glMatrix.vec3.add(rolling_front, tmp_front_f, tmp_front_u);
-    //         rolling_up = glMatrix.vec3.add(rolling_up, tmp_up_f, tmp_up_u);
-    //         //rolling_right = glMatrix.vec3.cross(rolling_right, rolling_front, rolling_up);
-    //         console.log(rolling_front);
-    //         console.log(rolling_up);
-    //     }
-    // };
 
     function update_rolling_axis(angle, axis) {
         tmp_up_a = glMatrix.vec3.create();
@@ -221,7 +194,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         checkKey(position);
         checkDoor(position);
         
-        if(isAt(position, glMatrix.vec3.fromValues(-8.0, 0.0, 22.0))){
+        if(ObjectLoader.getInstance().getMaze() == 1 && isAt(position, glMatrix.vec3.fromValues(-8.0, 2.0, 22.0))){
             console.log("CHANGE MAZE");
             ObjectLoader.getInstance().changeMaze();
         }
@@ -251,12 +224,39 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     }
 
     function checkDoor(position) {
-        for ( var i = 0; i < ObjectLoader.getInstance().getDoors().length; i++ ) {
-            if ( ObjectLoader.getInstance().getPlayerItemList().keysCount() == 3 && ObjectLoader.getInstance().getDoors()[i].checkStartAnimation(position) ) {
-                ObjectLoader.getInstance().getDoors()[i].setAnimation(true);
-                ObjectLoader.getInstance().getPlayerItemList().removeKeys();
-            }
+        if ( ObjectLoader.getInstance().getPlayerItemList().keysCount() == 3 && 
+        ObjectLoader.getInstance().getDoors()[ObjectLoader.getInstance().getCurrentDoor()].checkStartAnimation(position) ) {
+            ObjectLoader.getInstance().getDoors()[ObjectLoader.getInstance().getCurrentDoor()].setAnimation(true);
+            ObjectLoader.getInstance().getPlayerItemList().removeKeys();
         }
+    }
+
+    function animate(t){
+        if(jumping){
+            jump(t);
+        }
+    }
+
+    function jump(t){
+        var nextPos = null;
+        if(Math.abs(position[1] - startJumpPos) < 0.01 ){ //if starting the jump
+            startJumpTime = t;
+            startJumpPos = position[1];
+            position[1] = position[1] + 0.02; 
+        } else {
+            delta = (t - startJumpTime)/1000.0;
+            
+            nextPos = [position[0], startJumpPos + 5.0 * delta + (-9.81 * (delta)**2) / 2.0, position[2]]; // y0 + v0*(t-t0) + (a * (t-t0)**2)/2
+            if(!ObjectLoader.getInstance().isCollision(nextPos)){
+                position[1] = nextPos[1];
+            } else {
+                jumping = false;
+                startJumpPos = position[1];
+            }
+            
+        }
+        
+        update_model_position(0.0, rolling_right);
     }
 
     function deg2rad(deg) {
@@ -365,6 +365,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
 
     return {
         playerMesh: playerMesh,
+        animate: animate,
         place_player: place_player,
         setStartPosition: setStartPosition,
         setEndPosition: setEndPosition,

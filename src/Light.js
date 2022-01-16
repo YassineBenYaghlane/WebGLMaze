@@ -46,7 +46,7 @@ class Light {
     }
 
     getPosVec3(){
-        return glMatrix.vec4.fromValues(this.x, this.y, this.z)
+        return glMatrix.vec3.fromValues(this.x, this.y, this.z)
     }
 
     animate(t){
