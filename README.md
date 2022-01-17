@@ -26,3 +26,6 @@ opposed movements) are possible.
 - **R**: it allows the player to reset and be placed at the starting position if he/she is lost.
 - **Space bar**: it allows to jump in the Y-axis
 - **Combination of the first four controls** (which are not opposed movements) **are possible**.
+
+
+A demonstration of the game functionalities is available on YouTube: https://youtu.be/mXoZKzcaz_k 
