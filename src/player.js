@@ -16,6 +16,13 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     var end_position = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
 
     var camera_position = glMatrix.vec3.create();
+    
+    var delta = -1.0;
+
+    var direction =  glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
+    var rotationSpeed = 0.0;
+    var angle = Math.PI/64.0;
+    var rollAngle = Math.PI/64.0;
 
     var jumping = false;
     var startJumpTime = 0.0;
@@ -23,11 +30,11 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     
     var yaw = 90.0;
     var pitch = 0.0;
-    var movement_speed = 0.2;
-    var mouse_sensitivity = 4.0;
+    var movement_speed = 0.05;
+    var mouse_sensitivity = 1.0;
     
-    var object = await load_obj(obj_path);
-    var playerMesh = await make_object(gl, object);
+    var object = await ObjectLoader.getInstance().load_obj(obj_path);
+    var playerMesh = await ObjectLoader.getInstance().make_object(gl, object);
 
     var rolling_front = glMatrix.vec3.create();
     rolling_front = glMatrix.vec3.copy(rolling_front, front);
@@ -35,6 +42,9 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     rolling_right = glMatrix.vec3.copy(rolling_right, right);
     var rolling_up = glMatrix.vec3.create();
     rolling_up = glMatrix.vec3.copy(rolling_up, up);
+
+    var rotAxis = glMatrix.vec3.clone(front);
+    var rollAxis = glMatrix.vec3.clone(rolling_right);
 
     move_player();
     update_camera_vectors();
@@ -73,7 +83,6 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(0.05, 0.05, 0.05));
         gl.uniformMatrix4fv(unif['itM'], false, itM);
         gl.uniform3fv(unif['u_view_dir'], get_camera_position());
-        
         playerMesh.activate(shader);
         playerMesh.draw();
     };
@@ -86,15 +95,33 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === ' ') {
                 event.view.event.preventDefault();
             }
+
+            direction = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
+            rotAxis = glMatrix.vec3.copy(rotAxis, rolling_front);
+            rollAxis = glMatrix.vec3.copy(rollAxis, rolling_right);
+            angle = Math.PI/64.0;
+            rollAngle = Math.PI/64.0;
             
             if (event.key === 'ArrowDown') {
-                process_keyboard(PlayerMovement.BACKWARD);
+                direction = glMatrix.vec3.scale(direction, front, -1);
+                rollAxis = glMatrix.vec3.copy(rollAxis, rolling_front);
+                rotAxis = glMatrix.vec3.copy(rotAxis, rolling_right);
+                rollAngle *= -1;
             } else if (event.key === 'ArrowUp') {
-                process_keyboard(PlayerMovement.FORWARD);
+                direction = glMatrix.vec3.scale(direction, front, 1);
+                rollAxis = glMatrix.vec3.copy(rollAxis, rolling_front);
+                rotAxis = glMatrix.vec3.copy(rotAxis, rolling_right);
+                angle *= -1;
             } else if (event.key === 'q') {
-                process_keyboard(PlayerMovement.LEFT);
+                direction = glMatrix.vec3.scale(direction, right, -1);
+                angle *= -1;
+                rollAngle *= -1;
+                rollAxis = glMatrix.vec3.copy(rollAxis, rolling_right);
+                rotAxis = glMatrix.vec3.copy(rotAxis, rolling_front);
             } else if (event.key === 'd') {
-                process_keyboard(PlayerMovement.RIGHT);
+                direction = glMatrix.vec3.scale(direction, right, 1);
+                rollAxis = glMatrix.vec3.copy(rollAxis, rolling_right);
+                rotAxis = glMatrix.vec3.copy(rotAxis, rolling_front);
             } else if (event.key === 'r') {
                 teleport(start_position);
             } else if (event.key === ' ') {
@@ -105,31 +132,65 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
 
 
             else if (event.key === 'ArrowLeft') {
-                process_rotation_movement(-1.0, 0.0);
+                rotationSpeed = -mouse_sensitivity;
             } else if (event.key === 'ArrowRight') {
-                process_rotation_movement(1.0, 0);
+                rotationSpeed = +mouse_sensitivity;
             }
     
             if ((keysPressed['ArrowUp'] && event.key == 'ArrowLeft') || (keysPressed['ArrowLeft'] && event.key == 'ArrowUp')) {
-                process_keyboard(PlayerMovement.FORWARD);
-                process_rotation_movement(-1.0, 0.0);
+                rotationSpeed = -mouse_sensitivity;
+                direction = glMatrix.vec3.scale(direction, front, 1);
             }
             else if ((keysPressed['ArrowUp'] && event.key == 'ArrowRight') || (keysPressed['ArrowRight'] && event.key == 'ArrowUp')) {
-                process_keyboard(PlayerMovement.FORWARD);
-                process_rotation_movement(1.0, 0);
+                rotationSpeed = +mouse_sensitivity;
+                direction = glMatrix.vec3.scale(direction, front, 1);
             }
             else if ((keysPressed['ArrowDown'] && event.key == 'ArrowLeft') || (keysPressed['ArrowLeft'] && event.key == 'ArrowDown')) {
-                process_keyboard(PlayerMovement.BACKWARD);
-                process_rotation_movement(-1.0, 0.0);
+                rotationSpeed = -mouse_sensitivity;
+                direction = glMatrix.vec3.scale(direction, front, -1);
             }
             else if ((keysPressed['ArrowDown'] && event.key == 'ArrowRight') || (keysPressed['ArrowRight'] && event.key == 'ArrowDown')) {
-                process_keyboard(PlayerMovement.BACKWARD);
-                process_rotation_movement(1.0, 0);
+                rotationSpeed = +mouse_sensitivity;
+                direction = glMatrix.vec3.scale(direction, front, -1);
             }
+            else if ((keysPressed['ArrowUp'] && event.key == ' ') || (keysPressed[' '] && event.key == 'ArrowUp')) {
+                jumping = true;
+                direction = glMatrix.vec3.scale(direction, front, 1);
+            }
+            else if ((keysPressed['ArrowDown'] && event.key == ' ') || (keysPressed[' '] && event.key == 'ArrowDown')) {
+                jumping = true;
+                direction = glMatrix.vec3.scale(direction, front, -1);
+            }
+            else if ((keysPressed['q'] && event.key == ' ') || (keysPressed[' '] && event.key == 'q')) {
+                jumping = true;
+                direction = glMatrix.vec3.scale(direction, right, -1);
+            }
+            else if ((keysPressed['d'] && event.key == ' ') || (keysPressed[' '] && event.key == 'd')) {
+                jumping = true;
+                direction = glMatrix.vec3.scale(direction, right, 1);
+            }
+            
+            direction = glMatrix.vec3.scale(direction, direction, movement_speed);
         });
          
         document.addEventListener('keyup', (event) => {
             delete keysPressed[event.key];
+            if (event.key === 'ArrowDown') {
+                direction = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
+            } else if (event.key === 'ArrowUp') {
+                direction = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);;
+            } else if (event.key === 'q') {
+                direction = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);
+            } else if (event.key === 'd') {
+                direction = glMatrix.vec3.fromValues(0.0, 0.0, 0.0);;
+            }
+
+            if (event.key === 'ArrowLeft') {
+                rotationSpeed = 0.0;
+            } else if (event.key === 'ArrowRight') {
+                rotationSpeed = 0.0;
+            }
+
         });
     }
 
@@ -147,64 +208,6 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         axis = glMatrix.vec3.add(axis, tmp_axis_a, tmp_axis_u);
         rolling_up = glMatrix.vec3.add(rolling_up, tmp_up_a, tmp_up_u); 
     };
-    
-    function process_keyboard(direction) {
-        tmp = glMatrix.vec3.create();
-        nextPos = glMatrix.vec3.clone(position);
-        rad = Math.PI/4.0;
-        if (direction == PlayerMovement.FORWARD) {
-            tmp = glMatrix.vec3.scale(tmp, front, movement_speed);
-            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
-            if(!ObjectLoader.getInstance().isCollision(nextPos)){
-                position = glMatrix.vec3.add(position, position, tmp);
-                update_model_position(-rad, rolling_right);
-                update_rolling_axis(rad, rolling_front);
-            }
-        }
-        if (direction == PlayerMovement.BACKWARD) {
-            tmp = glMatrix.vec3.scale(tmp, front, -movement_speed);
-            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
-            if(!ObjectLoader.getInstance().isCollision(nextPos)){
-                position = glMatrix.vec3.add(position, position, tmp);
-                update_model_position(rad, rolling_right);
-                update_rolling_axis(-rad, rolling_front);
-            }
-        }
-        if (direction == PlayerMovement.LEFT) {
-            tmp = glMatrix.vec3.scale(tmp, right, -movement_speed);
-            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
-            if(!ObjectLoader.getInstance().isCollision(nextPos)){
-                position = glMatrix.vec3.add(position, position, tmp);
-                update_model_position(-rad, rolling_front);
-                update_rolling_axis(-rad, rolling_right);
-            }
-        }
-        if (direction == PlayerMovement.RIGHT) {
-            tmp = glMatrix.vec3.scale(tmp, right, movement_speed);
-            nextPos = glMatrix.vec3.add(nextPos, nextPos, tmp);
-            if(!ObjectLoader.getInstance().isCollision(nextPos)){
-                position = glMatrix.vec3.add(position, position, tmp);
-                update_model_position(rad, rolling_front);
-                update_rolling_axis(rad, rolling_right);
-            }
-        }
-
-        ObjectLoader.getInstance().getLights()[1].setPosition(position);
-
-        checkKey(position);
-        checkDoor(position);
-        
-        if(ObjectLoader.getInstance().getMaze() == 1 && isAt(position, glMatrix.vec3.fromValues(-8.0, 2.0, 22.0))){
-            console.log("CHANGE MAZE");
-            ObjectLoader.getInstance().changeMaze();
-        }
-
-        if(isAt(position, end_position)){
-            console.log("FINISHED");
-            
-            teleport(glMatrix.vec3.fromValues(0.0, -0.8, -4.0));
-        }
-    }
 
     function isAt(position, ref_position) {
         return (position[0] >= ref_position[0] - 1.0 && position[0] <= ref_position[0] + 1.0 &&
@@ -235,6 +238,35 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         if(jumping){
             jump(t);
         }
+
+        nextPos =  glMatrix.vec3.clone(position);
+        nextPos = glMatrix.vec3.add(nextPos, nextPos, direction);
+        if(!ObjectLoader.getInstance().isCollision(nextPos)){
+            position = glMatrix.vec3.add(position, position, direction);
+        }
+
+        if(direction[0] == 0.0 &&
+            direction[1] == 0.0 &&
+            direction[2] == 0.0){
+            angle = 0.0;
+        }
+
+        update_model_position();
+        process_rotation_movement(rotationSpeed, 0);
+
+        ObjectLoader.getInstance().getLights()[1].setPosition(position);
+
+        checkKey(position);
+        checkDoor(position);
+        
+        if(ObjectLoader.getInstance().getMaze() == 1 && isAt(position, glMatrix.vec3.fromValues(-8.0, 2.0, 22.0))){
+            ObjectLoader.getInstance().changeMaze();
+        }
+
+        if(isAt(position, end_position)){
+            teleport(glMatrix.vec3.fromValues(0.0, -0.8, -4.0));
+        }
+        
     }
 
     function jump(t){
@@ -316,7 +348,6 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
 
         tmp = glMatrix.vec3.scale(tmp, camera_front, 0.5);
 
-        // camera_position = glMatrix.vec3.create();
         camera_position = glMatrix.vec3.subtract(camera_position, position, tmp);
 
         camera_up = glMatrix.vec3.create();

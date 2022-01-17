@@ -13,7 +13,7 @@ var make_texture = function(gl, url) {
       // Now that the image has loaded make copy it to the texture.
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
-      // TODO add parameters for filtering and warping!
+      
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -26,10 +26,6 @@ var make_texture = function(gl, url) {
 var make_texture_cubemap = function(gl, folder_url, width=512, height=512) {
   var texture = gl.createTexture();
   
-  // We need to specify the type of texture we are using
-  // This is useful for the SAMPLER in the shader
-  // It will allow us to sample a point in any direction!
-  // and not only in (s,t) coordinates
   gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
    
   const faceInfos = [
@@ -62,9 +58,8 @@ var make_texture_cubemap = function(gl, folder_url, width=512, height=512) {
   faceInfos.forEach((faceInfo) => {
     const {target, url} = faceInfo;
    
-    // Upload the canvas to the cubemap face.
-    // setup each face so it's immediately renderable
-const level = 0;
+
+  const level = 0;
   const internalFormat = gl.RGBA;
   const format = gl.RGBA;
   const type = gl.UNSIGNED_BYTE;

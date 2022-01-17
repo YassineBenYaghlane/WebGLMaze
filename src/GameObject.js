@@ -1,6 +1,6 @@
 class GameObject {
-    objectData = null; // données du fichier .obj loadé
-    mesh = null; // apres make object
+    objectData = null;
+    mesh = null;
 
     constructor(name = 'cube', x=0.0, y=0.0, z=0.0, shader="normal", texture="brick2", animation=false){
         this.name = name;

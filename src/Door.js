@@ -36,13 +36,12 @@ class Door extends GameObject{
         return this.depth;
     }
 
-    animateTranslate(t, x, y, z){
-        if ( this.stepCount < 100) {
-            this.mesh.model = glMatrix.mat4.translate(this.mesh.model, this.mesh.model, glMatrix.vec3.fromValues(0.01*x, 0.01*y, 0.01*z));
-            this.x += 0.01 * x;
-            this.y += 0.01 * y;
-            this.z += 0.01 * z;
-            console.log(`DOOR POS ${this.y}`);
+    animateTranslate(t, x, y, z, speed=0.01){
+        if ( this.stepCount < 1.0/speed) {
+            this.mesh.model = glMatrix.mat4.translate(this.mesh.model, this.mesh.model, glMatrix.vec3.fromValues(speed*x, speed*y, speed*z));
+            this.x += speed * x;
+            this.y += speed * y;
+            this.z += speed * z;
             this.stepCount++;
         }
         else {
@@ -58,7 +57,7 @@ class Door extends GameObject{
                     this.animateTranslate(t, 0.0, -1.0, 0.0);
                     break;
                 case 2:
-                    this.animateTranslate(t, 0.0, 3.0, 0.0);
+                    this.animateTranslate(t, 0.0, 3.0, 0.0, 0.003);
                     break;
                 case 3:
                     this.animateTranslate(t, 0.0, -2.0, 0.0);
@@ -67,15 +66,6 @@ class Door extends GameObject{
                     console.log(`Wrong animation number : ${this.animationNumber}`);
             }
         }
-        
-        // if ( this.y > -1.1 ) {
-        //     this.mesh.model = glMatrix.mat4.translate(this.mesh.model, this.mesh.model, glMatrix.vec3.fromValues(0.0, -0.01, 0.0));
-        //     this.y -= 0.01;
-        // }
-        // // else {
-        // //     ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getObjects(), this);
-        // //     ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getDoors(), this);
-        // // }
     }
 
     setShader(shader) {

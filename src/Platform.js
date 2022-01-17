@@ -1,6 +1,6 @@
 class Platform extends GameObject{
 
-    constructor(x=0.0, y=0.0, z=0.0, texture="floor2"){
+    constructor(x=0.0, y=0.0, z=0.0, texture="floor"){
         super("cube", x, y, z, "multi_light", texture); //offset since the cube object is centered on itself
     }
 
