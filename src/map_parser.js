@@ -110,6 +110,9 @@ var map_loader = async function() {
                         var floor = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
                         await floor.make(gl);
                         ObjectLoader.getInstance().addObject(floor);
+                        var roof = new Platform(x=(-j) * obj_width, 3.0, (height - i) * obj_depth);
+                        await roof.make(gl);
+                        ObjectLoader.getInstance().addObject(roof);
                         break;
                     case 'w':
                         var go = new GameObject(obj_type, (-j) * obj_width, 2.0, (height - i) * obj_depth, "multi_light", "metal");

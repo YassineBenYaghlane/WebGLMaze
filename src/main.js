@@ -138,8 +138,8 @@ async function main() {
 
         // Print Infos
         ObjectLoader.getInstance().getPlayerItemList().displayKeys(itemElem);
-        player.show_view_html(camMatElem, view);
-        player.show_model_html(projMatElem);
+        // player.show_view_html(camMatElem, view);
+        // player.show_model_html(projMatElem);
         fps(time);
         window.requestAnimationFrame(animate); // While(True) loop!
     }
