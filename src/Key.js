@@ -1,6 +1,4 @@
 class Key extends GameObject{
-    
-
 
     constructor(x=0.0, y=0.0, z=0.0){
         super("key", x, y, z, "texture", "gold", true);

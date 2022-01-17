@@ -42,7 +42,6 @@ class Door extends GameObject{
             this.x += speed * x;
             this.y += speed * y;
             this.z += speed * z;
-            console.log(`DOOR POS ${this.y}`);
             this.stepCount++;
         }
         else {
@@ -67,15 +66,6 @@ class Door extends GameObject{
                     console.log(`Wrong animation number : ${this.animationNumber}`);
             }
         }
-        
-        // if ( this.y > -1.1 ) {
-        //     this.mesh.model = glMatrix.mat4.translate(this.mesh.model, this.mesh.model, glMatrix.vec3.fromValues(0.0, -0.01, 0.0));
-        //     this.y -= 0.01;
-        // }
-        // // else {
-        // //     ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getObjects(), this);
-        // //     ObjectLoader.getInstance().remove(ObjectLoader.getInstance().getDoors(), this);
-        // // }
     }
 
     setShader(shader) {

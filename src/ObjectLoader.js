@@ -14,7 +14,6 @@ var ObjectLoader = (function() {
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(this.meshes).includes(name)){
-                // console.log(`creating ${name}`);
                 return this.meshes[name];
             }
             else{
@@ -120,7 +119,6 @@ var ObjectLoader = (function() {
                 if(this.objects[i].isObstacle() && this.objects[i].isIn(nextPos)){
                   return true;
                 }
-                //if(this.collide(nextPos, ))
             }
             return false;
         }
@@ -215,7 +213,6 @@ var ObjectLoader = (function() {
                         ));
                         break;
                       case 'f': {
-                        // f = vertex/texture/normal vertex/texture/normal vertex/texture/normal
                         var f1 = parts[1].split('/');
                         var f2 = parts[2].split('/');
                         var f3 = parts[3].split('/');
@@ -304,7 +301,6 @@ var ObjectLoader = (function() {
                   ));
                   break;
                 case 'f': {
-                  // f = vertex/texture/normal vertex/texture/normal vertex/texture/normal
                   var f1 = parts[1].split('/');
                   var f2 = parts[2].split('/');
                   var f3 = parts[3].split('/');
@@ -404,9 +400,6 @@ var ObjectLoader = (function() {
                   let itM = glMatrix.mat4.create();
                   itM = glMatrix.mat4.invert(itM, this.objects[i].getMesh().model);
                   itM = glMatrix.mat4.transpose(itM, itM);
-                  if(this.objects[i] instanceof Plan){
-                    itM = glMatrix.mat4.scale(itM, itM, glMatrix.vec3.fromValues(this.objects[i].getWidth()/2.0, 0.01, this.objects[i].getDepth()/2.0));
-                  }
                   gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
                   gl.activeTexture(gl.TEXTURE0 + 0);
                   gl.bindTexture(gl.TEXTURE_2D, this.textures[this.objects[i].texture]);
@@ -420,7 +413,6 @@ var ObjectLoader = (function() {
         };
 
 		this.make_object = async function(gl, obj) {
-            // We need the object to be ready to proceed:
         obj = await obj;
         
         const buffer = gl.createBuffer();
@@ -429,8 +421,6 @@ var ObjectLoader = (function() {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     
         var Model = glMatrix.mat4.create();
-        // Model = glMatrix.mat4.scale(Model, Model, glMatrix.vec3.fromValues(0.2, 0.2, 0.2));
-        // Model = glMatrix.mat4.translate(Model, Model, glMatrix.vec3.fromValues(0.5, -0.5, -1.0));
     
         function activate(shader) {
             // these object have all 3 positions + 2 textures + 3 normals
@@ -463,7 +453,6 @@ var ObjectLoader = (function() {
 	}
 
   this.make_object_texture = async function(gl, obj) {
-    // We need the object to be ready to proceed:
     obj = await obj;
     
     const buffer = gl.createBuffer();
@@ -472,8 +461,6 @@ var ObjectLoader = (function() {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     var Model = glMatrix.mat4.create();
-    //Model = glMatrix.mat4.scale(Model, Model, glMatrix.vec3.fromValues(0.1, 0.1, 0.1));
-    // Model = glMatrix.mat4.translate(Model, Model, glMatrix.vec3.fromValues(0.5, -0.5, -1.0));
 
     function activate(shader) {
         // these object have all 3 positions + 2 textures + 3 normals + 3 tangents + 3 bitangents

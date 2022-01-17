@@ -1,25 +1,16 @@
 async function main() {
-    // Boilerplate code
     const canvas = document.getElementById('webgl_canvas');
     c_width = canvas.width
     c_height = canvas.height
     const gl = canvas.getContext('webgl');
 
-    // Enable tests for better rendering
     gl.enable(gl.DEPTH_TEST);
-    //gl.enable(gl.CULL_FACE); // cull hidden faces behind normals!
     
     ObjectLoader.getInstance().init(gl);
             
-    // loading the object from a file
     var cubemapObject = await ObjectLoader.getInstance().getObjectData("cube");
     var cubemapMesh = await ObjectLoader.getInstance().make_object(gl, cubemapObject);
     
-    // loading the object from a file
-    // var cube = await load_obj('../obj/wall.obj');
-    // Asynchronous call, we waited till the object was ready
-    // Make the buffer and the functions to draw the object:
-
     var loader = await map_loader();
     await loader.parse_map(gl, path="../maps/map.txt", objt_type="cube_texture");
 
@@ -40,7 +31,6 @@ async function main() {
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
 
-    // Retrieve the adress of the cubemap texture
     var texCube = make_texture_cubemap(gl, '../textures/cubemaps/twilight_sky_2');
 
 
@@ -73,7 +63,6 @@ async function main() {
         gl.uniform1i(unif["u_cubemap"], 0);
 
         cubemapMesh.draw();
-        // set back the depth function for next frame
         gl.depthFunc(gl.LESS);
 
         // Classic shaders for objects
@@ -83,10 +72,7 @@ async function main() {
         
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
-        // Send the light position to the shader
         gl.uniform3fv(unif["u_light_pos"], ObjectLoader.getInstance().getLights()[0].getPosVec3());
-        // Add the viewer position
-        // Set one time the camera position for all the shaders
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
   
         ObjectLoader.getInstance().draw_map(gl, shader_show_object, unif);
@@ -102,24 +88,20 @@ async function main() {
         gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
 
         ObjectLoader.getInstance().draw_map(gl, shader_texture, unif);
-        //player.draw_player(gl, shader_texture, unif);
         
         // Multi light shader
         shader_multi_light.use();
         var unif = shader_multi_light.get_uniforms();
         gl.uniformMatrix4fv(unif['view'], false, view);
         gl.uniformMatrix4fv(unif['proj'], false, projection);
+        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
 
         for(var i = 0; i < ObjectLoader.getInstance().getLights().length; i++){
             gl.uniform4fv(gl.getUniformLocation(shader_multi_light.program, `u_light_pos${i}`), ObjectLoader.getInstance().getLights()[i].getPosVec4());
-
             gl.uniform3fv(gl.getUniformLocation(shader_multi_light.program, `u_light_color${i}`), ObjectLoader.getInstance().getLights()[i].getCurrentColor());
         }
 
-        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
-
         ObjectLoader.getInstance().draw_map(gl, shader_multi_light, unif);
-
 
         // Effect shader
         gl.depthFunc(gl.LEQUAL);
@@ -141,7 +123,7 @@ async function main() {
         // player.show_view_html(camMatElem, view);
         // player.show_model_html(projMatElem);
         fps(time);
-        window.requestAnimationFrame(animate); // While(True) loop!
+        window.requestAnimationFrame(animate);
     }
 
     var prev = 0
