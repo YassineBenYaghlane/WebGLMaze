@@ -36,32 +36,6 @@ async function main() {
 
     var texCube = make_texture_cubemap(gl, '../textures/cubemaps/fortnite');
 
-    var shadowDepthTextureSize = 512
-
-    var shadowFramebuffer = gl.createFramebuffer()
-    gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFramebuffer)
-
-    var shadowDepthTexture = gl.createTexture()
-    gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadowDepthTextureSize,
-    shadowDepthTextureSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
-
-    var renderBuffer = gl.createRenderbuffer()
-    gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,
-    shadowDepthTextureSize, shadowDepthTextureSize)
-
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
-    gl.TEXTURE_2D, shadowDepthTexture, 0)
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-    gl.RENDERBUFFER, renderBuffer)
-
-    gl.bindTexture(gl.TEXTURE_2D, null)
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-
     var s = 3;
     var lightProjectionMatrix = glMatrix.mat4.ortho(
         [], -10 * s, 10 * s, -10 * s, 10 * s, -10 , 80 
@@ -71,6 +45,9 @@ async function main() {
         ObjectLoader.getInstance().getLights()[0].getPosVec3(),
         [0, 0, 30],
         [0, 1, 0])
+
+    var shadow = shadow_manager(gl);
+    shadow.init(gl);
 
 
     function animate(time) {
@@ -93,21 +70,7 @@ async function main() {
         gl.uniformMatrix4fv(shadowPMatrix, false, lightProjectionMatrix)
         gl.uniformMatrix4fv(shadowMVMatrix, false, lightViewMatrix)
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, shadowFramebuffer)
-        gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer)
-        gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
-
-        gl.enable(gl.DEPTH_TEST);
-        gl.viewport(0, 0, shadowDepthTextureSize, shadowDepthTextureSize)
-        gl.clearDepth(1.0)
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-        ObjectLoader.getInstance().draw_map(gl, shader_shadow, unif);
-        player.draw_player(gl, shader_shadow, unif);
-
-        gl.bindTexture(gl.TEXTURE_2D, null)
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+        shadow.draw(gl, shader_shadow, unif, player);
 
         gl.viewport(0, 0, canvas.width, canvas.height)
         gl.clearDepth(1.0)
@@ -135,7 +98,7 @@ async function main() {
         var samplerUniform = gl.getUniformLocation(shader_shadow_objects.program,
             'depthColorTexture')
         gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_2D, shadowDepthTexture)
+        gl.bindTexture(gl.TEXTURE_2D, shadow.shadowDepthTexture)
         gl.uniform1i(samplerUniform, 0)
   
         ObjectLoader.getInstance().draw_map(gl, shader_shadow_objects, unif);
