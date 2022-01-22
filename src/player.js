@@ -227,7 +227,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     }
 
     function checkDoor(position) {
-        if ( ObjectLoader.getInstance().getPlayerItemList().keysCount() == 3 && 
+        if ( ObjectLoader.getInstance().getPlayerItemList().keysCount() >= 3 && 
         ObjectLoader.getInstance().getDoors()[ObjectLoader.getInstance().getCurrentDoor()].checkStartAnimation(position) ) {
             ObjectLoader.getInstance().getDoors()[ObjectLoader.getInstance().getCurrentDoor()].setAnimation(true);
             ObjectLoader.getInstance().getPlayerItemList().removeKeys();

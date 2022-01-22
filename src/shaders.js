@@ -40,7 +40,7 @@ var make_shader = function (gl, name) {
       vec3 L = normalize(u_light_pos - v_frag_coord);
       
       // Diffuse
-      float diffusion = max(0.0, dot(v_normal, L));
+      float diffusion = max(0.0, dot(normal, L));
       
       // specural
       float spec_strength = 0.8;
@@ -292,7 +292,165 @@ var make_shader = function (gl, name) {
     }
   `;
 
-    //console.log(sourceFMultiLight);
+    const sourceShadowsV = `
+    attribute vec3 position;
+    attribute vec3 normal;
+    
+    uniform mat4 M;
+    uniform mat4 uPMatrix;
+    uniform mat4 uMVMatrix;
+
+    void main (void) {
+    vec4 pos = M*vec4(position, 1.0);
+    gl_Position = uPMatrix * uMVMatrix * pos;
+    }
+		`;
+		
+		const sourceShadowsF = `
+    precision mediump float;
+
+    vec4 encodeFloat (float depth) {
+      const vec4 bitShift = vec4(
+          256 * 256 * 256,
+          256 * 256,
+          256,
+          1.0
+      );
+      const vec4 bitMask = vec4(
+          0,
+          1.0 / 256.0,
+          1.0 / 256.0,
+          1.0 / 256.0
+      );
+      vec4 comp = fract(depth * bitShift);
+      comp -= comp.xxyz * bitMask;
+      return comp;
+    }
+
+    void main (void) {
+    gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z,gl_FragCoord.z,1.0);
+    }
+    `;
+
+    const sourceShadowsObjectsV = `
+    attribute vec3 position;
+    attribute vec2 texcoord;
+    attribute vec3 normal;
+    attribute vec3 tangent;
+    attribute vec3 bitangent;
+    
+    uniform mat4 M;
+    uniform mat4 itM;
+    uniform mat4 V;
+    uniform mat4 P;
+    uniform mat4 lightMViewMatrix;
+    uniform mat4 lightProjectionMatrix;
+
+    varying vec3 v_normal;
+    varying vec3 v_frag_coord;
+    varying vec4 shadowPos;
+    varying vec2 v_texcoord;
+    varying mat3 TBN;
+    
+    void main (void) {
+      vec4 frag_coord = M*vec4(position, 1.0);
+      gl_Position = P*V*frag_coord;
+    
+      shadowPos = lightProjectionMatrix * lightMViewMatrix * frag_coord;
+
+      v_normal = vec3(itM * vec4(normal, 1.0));
+      v_frag_coord = frag_coord.xyz;
+      v_texcoord = texcoord;
+
+      vec3 T = normalize(vec3(M * vec4(tangent,   0.0)));
+      vec3 N = normalize(vec3(M * vec4(normal,    0.0)));
+
+      T = normalize(T - dot(T, N) * N);
+
+      vec3 B = cross(N, T);
+
+      TBN = mat3(T, B, N);
+    }
+    `;
+
+    shadowDepthTextureSize = 1024;
+    const sourceShadowsObjectsF = `
+    precision mediump float;
+
+    varying vec4 shadowPos;
+    varying vec3 v_normal;
+    varying vec3 v_frag_coord;
+    varying vec2 v_texcoord;
+    varying mat3 TBN;
+    
+    uniform vec3 u_light_pos;
+    uniform vec3 u_view_dir;
+
+    uniform sampler2D depthColorTexture;
+    uniform sampler2D u_texture;
+    uniform sampler2D u_normalMap;`
+   + ObjectLoader.getInstance().generateLightStringInit()
+   + `
+    
+    float shadowLightIntensity (vec3 fragmentDepth) {
+      float texelSize = 1.0 / ${shadowDepthTextureSize}.0;
+      float light = 0.0;
+      float texelDepth;
+
+      for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+          texelDepth = texture2D(depthColorTexture,fragmentDepth.xy 
+          + vec2(x, y) * texelSize).x;
+          if (fragmentDepth.z < texelDepth) {
+            light += 1.0;
+          }
+        }
+      }
+      light /= 9.0;
+      return light;
+    }
+
+    void main(void) {
+      `
+      + ObjectLoader.getInstance().generateLightStringBoolParse()
+      + `
+      float spec_strength = 0.8;
+      float ambient = 0.1;
+      vec3 L;
+      float diffusion;
+      vec3 view_dir;
+      float spec;
+      float specular;
+      float att;
+      vec3 reflect_dir;
+      vec3 light_color;
+      vec3 color;
+      float amountInLight;
+      light_color = vec3(1.0, 1.0, 1.0);
+
+      //// Normal transform
+      vec3 normal = texture2D(u_normalMap, vec2(v_texcoord.x, 1.0-v_texcoord.y)).rgb;
+      normal = normal * 2.0 - 1.0;   
+      normal = normalize(TBN * normal);
+
+      //// Shadow computation
+      vec3 fragmentDepth = shadowPos.xyz;
+      float shadowAcneRemover = 0.007;
+      fragmentDepth.z -= shadowAcneRemover;
+      fragmentDepth = fragmentDepth * 0.5 + 0.5;
+
+      amountInLight = shadowLightIntensity(fragmentDepth);
+
+      //// Light computation
+      `
+      + ObjectLoader.getInstance().generateLightStringComputation()
+      + `
+      gl_FragColor = vec4(color, 1.0) * texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
+      
+    }
+`;
+
+    // console.log(sourceShadowsObjectsF);
 
 
     function compile_shader(source, type) {
@@ -375,8 +533,16 @@ var make_shader = function (gl, name) {
           fragment_shader = sourceF_texture;
           break;
         case "multi_light":
-        vertex_shader = sourceVMultiLight;
-        fragment_shader = sourceFMultiLight;
+          vertex_shader = sourceVMultiLight;
+          fragment_shader = sourceFMultiLight;
+          break;
+        case "shadow":
+          vertex_shader = sourceShadowsV;
+          fragment_shader = sourceShadowsF;
+          break;
+        case "shadow_objects":
+          vertex_shader = sourceShadowsObjectsV;
+          fragment_shader = sourceShadowsObjectsF;
           break;
         default:
             console.log("Wrong shader type");

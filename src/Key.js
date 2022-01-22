@@ -1,7 +1,7 @@
 class Key extends GameObject{
 
     constructor(x=0.0, y=0.0, z=0.0){
-        super("key", x, y, z, "texture", "gold", true);
+        super("key", x, y, z, "shadow_objects", "gold", true);
         this.light = undefined;
     }
 

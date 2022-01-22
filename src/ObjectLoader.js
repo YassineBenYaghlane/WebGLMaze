@@ -104,7 +104,7 @@ var ObjectLoader = (function() {
             this.doors[this.currentDoor].setAnimation(true);
             this.doors[this.currentDoor].setAnimationNumber(2);
             this.currentDoor++;
-            this.lights[0].setOn(0.0);
+            //this.lights[0].setOn(0.0);
             this.lights[1].setOn(1.0);
           }
           else{
@@ -156,21 +156,17 @@ var ObjectLoader = (function() {
               specular = spec_strength * spec;
               `;
             if(i==0){
-              out += `att = 1.0;`;
-            } 
-            else if(i==1) {
-              out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 1.0)));`;
-            }
-            else {
-              out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 2.0)));`;
-            }
-            if(i==1){
-              out += `
-              color += (ambient + specular + 2.0*diffusion) * u_light_color${i} * att * 0.4;
+              out += `att = 1.0;
+              color = (ambient + amountInLight * (specular + diffusion)) * u_light_color${i} * att;
             }`;
             } 
+            else if(i==1) {
+              out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 1.0)));
+              color += (ambient + specular + 2.0*diffusion) * u_light_color${i} * att * 0.4;
+            }`;
+            }
             else {
-              out += `
+              out += `att = 0.5/(0.8*(pow(distance(light_pos${i}, v_frag_coord), 2.0)));
               color += (ambient + specular + diffusion) * u_light_color${i} * att * 0.7;
             }`;
             }
@@ -394,19 +390,19 @@ var ObjectLoader = (function() {
 		
         this.draw_map = function(gl, shader, unif){
             for(var i = 0; i < this.objects.length; i++){
-              if(this.objects[i].getShader() == shader.name){
+              if(this.objects[i].getShader() == shader.name || shader.name == "shadow"){
                   this.objects[i].getMesh().activate(shader);
                   gl.uniformMatrix4fv(unif['model'], false, this.objects[i].getMesh().model);
                   let itM = glMatrix.mat4.create();
                   itM = glMatrix.mat4.invert(itM, this.objects[i].getMesh().model);
                   itM = glMatrix.mat4.transpose(itM, itM);
                   gl.uniformMatrix4fv(gl.getUniformLocation(shader.program, 'itM'), false, itM);
-                  gl.activeTexture(gl.TEXTURE0 + 0);
-                  gl.bindTexture(gl.TEXTURE_2D, this.textures[this.objects[i].texture]);
-                  gl.uniform1i(unif["u_texture"], 0);
                   gl.activeTexture(gl.TEXTURE0 + 1);
+                  gl.bindTexture(gl.TEXTURE_2D, this.textures[this.objects[i].texture]);
+                  gl.uniform1i(unif["u_texture"], 1);
+                  gl.activeTexture(gl.TEXTURE0 + 2);
                   gl.bindTexture(gl.TEXTURE_2D, this.textures[this.objects[i].textureNormalMap]);
-                  gl.uniform1i(unif["u_normalMap"], 1);
+                  gl.uniform1i(unif["u_normalMap"], 2);
                   this.objects[i].getMesh().draw();
               }
             };

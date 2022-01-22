@@ -1,7 +1,7 @@
 class Platform extends GameObject{
 
     constructor(x=0.0, y=0.0, z=0.0, texture="floor"){
-        super("cube", x, y, z, "multi_light", texture); //offset since the cube object is centered on itself
+        super("cube_texture", x, y, z, "shadow_objects", texture); //offset since the cube object is centered on itself
     }
 
     isObstacle(){
@@ -9,7 +9,7 @@ class Platform extends GameObject{
     }
 
     async make(gl){
-        this.mesh = await ObjectLoader.getInstance().make_object(gl, this.objectData);
+        this.mesh = await ObjectLoader.getInstance().make_object_texture(gl, this.objectData);
         this.mesh.model = glMatrix.mat4.translate(this.mesh.model,this.mesh.model,
                     glMatrix.vec3.fromValues(this.x, this.y, this.z));
 

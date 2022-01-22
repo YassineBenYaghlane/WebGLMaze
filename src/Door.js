@@ -1,7 +1,7 @@
 class Door extends GameObject{
 
     constructor(x=0.0, y=0.0, z=0.0, texture="brick2", animationNumber=1){
-        super("cube_texture", x, y, z, "multi_light", texture, false);
+        super("cube_texture", x, y, z, "shadow_objects", texture, false);
         this.animationNumber = animationNumber;
         this.stepCount = 0;
     }
