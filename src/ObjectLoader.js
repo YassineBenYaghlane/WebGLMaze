@@ -398,8 +398,11 @@ var ObjectLoader = (function() {
         return ret;
     }
 		
-        this.draw_map = function(gl, shader, unif){
+        this.draw_map = function(gl, shader, unif, portalView=false){
             for(var i = 0; i < this.objects.length; i++){
+              if(!portalView && this.objects[i] instanceof Portal){
+                continue // not drawing portals specific texture in this function
+              }
               if(this.objects[i].getShader() == shader.name || shader.name == "shadow"){
                   this.objects[i].getMesh().activate(shader);
                   gl.uniformMatrix4fv(unif['model'], false, this.objects[i].getMesh().model);
