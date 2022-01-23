@@ -77,6 +77,11 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addKey(key);
                         ObjectLoader.getInstance().addLight(light);
                         break;
+                    case 'P':
+                        var go = new Portal((-j) * obj_width, 0.0, (height - i) * obj_depth);
+                        await go.make(gl);
+                        ObjectLoader.getInstance().addObject(go);
+                        break;
                     case 'k':
                         var floor = new Platform(x=(-j) * obj_width, 1.0, (height - i) * obj_depth);
                         await floor.make(gl);

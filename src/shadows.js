@@ -27,6 +27,7 @@ var shadow_manager = function(gl){
         gl.bindTexture(gl.TEXTURE_2D, null)
         gl.bindRenderbuffer(gl.RENDERBUFFER, null)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+        
     }
 
     function draw(gl, shader, unif, player){

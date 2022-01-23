@@ -55,6 +55,16 @@ var ObjectLoader = (function() {
             return this.objects;
         }
 
+        this.getPortal = function(){
+          for(var i = 0; i < this.objects.length; i++){
+            if(this.objects[i] instanceof Portal){
+              return this.objects[i];
+            }
+          }
+          return null;
+      }
+
+
         this.addLight = function(light) {
           this.lights.push(light);
         }
@@ -104,7 +114,7 @@ var ObjectLoader = (function() {
             this.doors[this.currentDoor].setAnimation(true);
             this.doors[this.currentDoor].setAnimationNumber(2);
             this.currentDoor++;
-            //this.lights[0].setOn(0.0);
+            this.lights[0].setOn(0.0);
             this.lights[1].setOn(1.0);
           }
           else{
@@ -498,11 +508,7 @@ var ObjectLoader = (function() {
   }
 
     this.animate = function(t) {
-      for ( var i = 0; i < this.objects.length; i++ ) {
-        if ( this.objects[i].getAnimation() ){
-          this.objects[i].animate(t);
-        }
-      }
+      this.objects.forEach((obj) => obj.getAnimation() && obj.animate(t))
       for ( var i = 0; i < this.lights.length; i++ ) {
         if ( this.lights[i].getOn() == 1.0 ){
           this.lights[i].animate(t);

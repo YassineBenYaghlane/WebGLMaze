@@ -374,6 +374,7 @@ var make_shader = function (gl, name) {
     `;
 
     shadowDepthTextureSize = 1024;
+
     const sourceShadowsObjectsF = `
     precision mediump float;
 
@@ -449,6 +450,44 @@ var make_shader = function (gl, name) {
       
     }
 `;
+
+    const sourcePortalV = `
+        attribute vec3 position;
+        attribute vec2 texcoord;
+        
+        uniform mat4 M;
+        uniform mat4 V;
+        uniform mat4 P;
+
+        varying vec2 v_texcoord;
+        
+        void main (void) {
+          vec4 frag_coord = M*vec4(position, 1.0);
+          gl_Position = P*V*frag_coord;
+          v_texcoord = texcoord;
+        }
+        `;
+      const sourcePortalF = `
+          precision mediump float;
+
+          varying vec2 v_texcoord;
+          uniform sampler2D frameTexture;
+
+          void main(void) {
+            vec3 color = vec3(1.0, 1.0, 1.0);
+            vec4 tex = texture2D(frameTexture, vec2(1.0-v_texcoord.x, v_texcoord.y));
+            gl_FragColor = vec4(color, 1.0) * tex;
+
+            // if(tex == vec4(0.0, 0.0, 0.0, 1.0)){
+            //   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            // }
+            // else {
+            //   gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+            // }
+            
+            
+          }
+      `;
 
     // console.log(sourceShadowsObjectsF);
 
@@ -543,6 +582,10 @@ var make_shader = function (gl, name) {
         case "shadow_objects":
           vertex_shader = sourceShadowsObjectsV;
           fragment_shader = sourceShadowsObjectsF;
+          break;
+        case "portal":
+          vertex_shader = sourcePortalV;
+          fragment_shader = sourcePortalF;
           break;
         default:
             console.log("Wrong shader type");

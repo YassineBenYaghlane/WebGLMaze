@@ -21,6 +21,7 @@ async function main() {
     //var shader_multi_light = make_shader(gl, "multi_light");
     var shader_shadow = make_shader(gl, "shadow");
     var shader_shadow_objects = make_shader(gl, "shadow_objects");
+    var shader_portal = make_shader(gl, "portal");
     
 
     var player = await make_player(gl, obj_path="../obj/sphere_smooth.obj");
@@ -46,13 +47,28 @@ async function main() {
         [0, 0, 30],
         [0, 1, 0])
 
+    //portal view
+    var portalView = glMatrix.mat4.create()
+    portalView = glMatrix.mat4.lookAt(
+        [], 
+        [-14, 17, 32], //camera pos
+        [-14, 0, 32.001], // looking at
+        [0, 1, 0])
+
+
+    var portal = ObjectLoader.getInstance().getPortal();
+    if(portal == null){
+        console.log("probklem");
+    }
+    portal.initFrameBufferTexture(gl, canvas.width, canvas.height);
+
     var shadow = shadow_manager(gl);
     shadow.init(gl);
 
 
     function animate(time) {
         //Draw loop
-        gl.clearColor(0.5, 0.5, 0.5, 1);
+        gl.clearColor(1.0, 1.0, 1.0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         ObjectLoader.getInstance().animate(time);
@@ -72,12 +88,95 @@ async function main() {
 
         shadow.draw(gl, shader_shadow, unif, player);
 
-        gl.viewport(0, 0, canvas.width, canvas.height)
+        /////////////////////////////////// PORTAL
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, portal.frameBuffer)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, portal.renderBuffer)
+        gl.bindTexture(gl.TEXTURE_2D, portal.texture)
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.viewport(0, 0, 512, 512)
         gl.clearDepth(1.0)
-        gl.clearColor(0.0, 0.0, 0.5, 1);
+        gl.clearColor(0.0, 0.0, 0.0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-        // shader for objects with shadows
+        // Shader for cubemap
+        gl.depthFunc(gl.LEQUAL);
+        shader_cubemap.use();
+        var unif = shader_cubemap.get_uniforms();
+
+        cubemapMesh.activate(shader_cubemap);
+
+        gl.uniformMatrix4fv(unif['model'], false, cubemapMesh.model);
+        gl.uniformMatrix4fv(unif['view'], false, view);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+        
+        // Activate the texture for the cube
+        gl.activeTexture(gl.TEXTURE0 + 0);
+        gl.bindTexture(gl.TEXTURE_2D, texCube);
+        gl.uniform1i(unif["u_cubemap"], 0);
+
+        cubemapMesh.draw();
+        gl.depthFunc(gl.LESS);
+
+
+
+        // Shader for objects with shadows
+        shader_shadow_objects.use();
+        var unif = shader_shadow_objects.get_uniforms();
+        
+        gl.uniformMatrix4fv(unif['view'], false, portalView);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+        var shadowPMatrix = gl.getUniformLocation(shader_shadow_objects.program,'lightProjectionMatrix')
+        var shadowMVMatrix = gl.getUniformLocation(shader_shadow_objects.program,'lightMViewMatrix')
+        gl.uniformMatrix4fv(shadowPMatrix, false, lightProjectionMatrix)
+        gl.uniformMatrix4fv(shadowMVMatrix, false, lightViewMatrix)
+        gl.uniform3fv(unif["u_light_pos"], ObjectLoader.getInstance().getLights()[0].getPosVec3());
+        gl.uniform3fv(unif["u_view_dir"], player.get_camera_position());
+        
+        for(var i = 0; i < ObjectLoader.getInstance().getLights().length; i++){
+            gl.uniform4fv(gl.getUniformLocation(shader_shadow_objects.program, `u_light_pos${i}`), ObjectLoader.getInstance().getLights()[i].getPosVec4());
+            gl.uniform3fv(gl.getUniformLocation(shader_shadow_objects.program, `u_light_color${i}`), ObjectLoader.getInstance().getLights()[i].getCurrentColor());
+        }
+
+        var samplerUniform = gl.getUniformLocation(shader_shadow_objects.program,
+            'depthColorTexture')
+        gl.activeTexture(gl.TEXTURE0)
+        gl.bindTexture(gl.TEXTURE_2D, shadow.shadowDepthTexture)
+        gl.uniform1i(samplerUniform, 0)
+  
+        ObjectLoader.getInstance().draw_map(gl, shader_shadow_objects, unif);
+        
+
+        // Effect shader
+        gl.depthFunc(gl.LEQUAL);
+        shader_reflexion.use();
+        var unif = shader_reflexion.get_uniforms();
+        gl.uniformMatrix4fv(unif['view'], false, portalView);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+
+        gl.activeTexture(gl.TEXTURE0 + 0);
+        gl.bindTexture(gl.TEXTURE_2D, texCube);
+        gl.uniform1i(unif["u_cubemap"], 0);
+
+        player.draw_player(gl, shader_reflexion, unif);
+
+        gl.depthFunc(gl.LESS);
+
+        gl.bindTexture(gl.TEXTURE_2D, null)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.viewport(0, 0, canvas.width, canvas.height)
+        gl.clearDepth(1.0)
+        gl.clearColor(0.4, 0.4, 0.4, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+        ///////////////////////////////////
+
+
+        ////Shader for objects with shadows
         shader_shadow_objects.use();
         var unif = shader_shadow_objects.get_uniforms();
         
@@ -102,7 +201,21 @@ async function main() {
         gl.uniform1i(samplerUniform, 0)
   
         ObjectLoader.getInstance().draw_map(gl, shader_shadow_objects, unif);
-        // player.draw_player(gl, shader_shadow_objects, unif);
+        
+        // Shader for Portals
+        shader_portal.use();
+        var unif = shader_portal.get_uniforms();
+        
+        gl.uniformMatrix4fv(unif['view'], false, view);
+        gl.uniformMatrix4fv(unif['proj'], false, projection);
+
+        var frameTexture = gl.getUniformLocation(shader_portal.program,
+            'frameTexture')
+        gl.activeTexture(gl.TEXTURE0 )
+        gl.bindTexture(gl.TEXTURE_2D, portal.texture)
+        gl.uniform1i(frameTexture,0)
+  
+        ObjectLoader.getInstance().draw_map(gl, shader_portal, unif);
 
         // // Shader for cubemap
         gl.depthFunc(gl.LEQUAL);
@@ -178,7 +291,7 @@ async function main() {
 
         // // Print Infos
         ObjectLoader.getInstance().getPlayerItemList().displayKeys(itemElem);
-        // player.show_view_html(camMatElem, view);
+        player.show_view_html(camMatElem, view);
         // player.show_model_html(projMatElem);
         fps(time);
         window.requestAnimationFrame(animate);
