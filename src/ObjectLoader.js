@@ -11,6 +11,7 @@ var ObjectLoader = (function() {
         this.lights = [];
         this.maze = 1;
         this.currentDoor = 0;
+        this.portalCollisionObject = null;
 
         this.getObjectData = function(name = 'cube') {
             if (Object.keys(this.meshes).includes(name)){
@@ -88,6 +89,14 @@ var ObjectLoader = (function() {
             this.currentDoor = a;
         }
 
+        this.getPortalCollisionObject = function(){
+          return this.portalCollisionObject;
+        }
+  
+        this.setPortalCollisionObject = function(a){
+            this.portalCollisionObject = a;
+        }
+
         this.getKeys = function(){
           return this.keys;
         }
@@ -127,6 +136,9 @@ var ObjectLoader = (function() {
         this.isCollision = function(nextPos){
             for(var i = 0; i < this.objects.length; i++){
                 if(this.objects[i].isObstacle() && this.objects[i].isIn(nextPos)){
+                  if(this.objects[i] instanceof Portal && this.objects[i].teleport){
+                    this.portalCollisionObject = this.objects[i]
+                  }
                   return true;
                 }
             }

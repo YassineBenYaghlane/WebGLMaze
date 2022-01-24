@@ -34,6 +34,7 @@ async function main() {
     const itemElem = document.querySelector("#Keys");
     const camMatElem = document.querySelector("#camera_mat");
     const projMatElem = document.querySelector("#proj_mat");
+    const posElem = document.querySelector("#pos_vec");
 
     var texCube = make_texture_cubemap(gl, '../textures/cubemaps/fortnite');
 
@@ -208,8 +209,9 @@ async function main() {
 
         // // Print Infos
         ObjectLoader.getInstance().getPlayerItemList().displayKeys(itemElem);
-        player.show_view_html(camMatElem, view);
+        // player.show_view_html(camMatElem, view);
         // player.show_model_html(projMatElem);
+        player.show_pos_html(posElem)
         fps(time);
         window.requestAnimationFrame(animate);
     }

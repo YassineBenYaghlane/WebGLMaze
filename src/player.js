@@ -243,6 +243,11 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         nextPos = glMatrix.vec3.add(nextPos, nextPos, direction);
         if(!ObjectLoader.getInstance().isCollision(nextPos)){
             position = glMatrix.vec3.add(position, position, direction);
+        } 
+        if(ObjectLoader.getInstance().getPortalCollisionObject() != null){
+            var portalTarget = ObjectLoader.getInstance().getPortalCollisionObject().center
+            position = glMatrix.vec3.fromValues(portalTarget[0], position[1], portalTarget[2]); 
+            ObjectLoader.getInstance().setPortalCollisionObject(null)  
         }
 
         if(direction[0] == 0.0 &&
@@ -373,6 +378,10 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         return camera_position;
     }
 
+    function show_pos_html(tag) {
+        show_vec(tag, 'Pos', position);
+    }
+
     function show_view_html(tag, view) {
         show_mat(tag, 'View', view);
     }
@@ -384,6 +393,12 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
     function fl(x) {
         return Number.parseFloat(x).toFixed(3);
       }
+
+    function show_vec(tag, name, vec) {
+    var txt = name + ': '
+    txt += fl(vec[0]) + ' ' + fl(vec[1]) + ' ' + fl(vec[2]) + '<br />'
+    tag.innerHTML = txt;
+    };
 
     function show_mat(tag, name, m) {
         var txt = name + ':<br />'
@@ -405,6 +420,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         get_projection: get_projection,
         get_position: get_position,
         get_camera_position: get_camera_position,
+        show_pos_html, show_pos_html,
         show_model_html: show_model_html,
         show_view_html: show_view_html
     }
