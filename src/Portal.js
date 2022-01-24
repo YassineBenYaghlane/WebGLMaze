@@ -3,6 +3,7 @@ class Portal extends GameObject{
     constructor(x=0.0, y=0.0, z=0.0, texture="brick2", eye=[-14, 17, 32], center=[-14, 0, 32.001], teleport=false){
         super("cube_texture", x, y, z, "shadow_objects", texture);
         this.center = center;
+        this.eye = eye
         this.depthTextureSize = 512
         this.viewMatrix = this.buildViewMatrix(eye, center);
         this.teleport = teleport;

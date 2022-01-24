@@ -83,7 +83,6 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(go);
                         break;
                     case 'Z':
-                        console.log(`x : ${(-j) * obj_width}, z : ${(height - i) * obj_depth}`)
                         var go = new Portal((-j) * obj_width, 0.0, (height - i) * obj_depth, texture="brick2", eye=[-17, 1, 26], center=[-18, 0.4, 26], teleport=true);
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
@@ -93,7 +92,7 @@ var map_loader = async function() {
                         ObjectLoader.getInstance().addObject(go);
                         break;
                     case 'M':
-                        var go = new Portal((-j) * obj_width, 0.0, (height - i) * obj_depth, texture="brick2", eye=[-24, 1, 27], center=[-24, 0.4, 28]);
+                        var go = new Portal((-j) * obj_width, 0.0, (height - i) * obj_depth, texture="brick2", eye=[-24, 1, 27], center=[-24, 0.4, 28], teleport=true);
                         await go.make(gl);
                         ObjectLoader.getInstance().addObject(go);
                         break;

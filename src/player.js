@@ -124,6 +124,9 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
                 rotAxis = glMatrix.vec3.copy(rotAxis, rolling_front);
             } else if (event.key === 'r') {
                 teleport(start_position);
+                process_rotation_movement(-yaw + 90, 0)
+                jumping = false;
+                startJumpPos = -0.9
             } else if (event.key === ' ') {
                 if(!jumping){
                     jumping = true;
@@ -245,9 +248,14 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
             position = glMatrix.vec3.add(position, position, direction);
         } 
         if(ObjectLoader.getInstance().getPortalCollisionObject() != null){
-            var portalTarget = ObjectLoader.getInstance().getPortalCollisionObject().center
-            position = glMatrix.vec3.fromValues(portalTarget[0], position[1], portalTarget[2]); 
-            ObjectLoader.getInstance().setPortalCollisionObject(null)  
+            var portal = ObjectLoader.getInstance().getPortalCollisionObject()
+            position = glMatrix.vec3.fromValues(portal.center[0], position[1], portal.center[2]); 
+            ObjectLoader.getInstance().setPortalCollisionObject(null)
+            var diff = glMatrix.vec3.create()
+            diff = glMatrix.vec3.subtract(diff, portal.center, portal.eye)
+            diff = glMatrix.vec3.fromValues(diff[0], 0, diff[2])
+            process_rotation_movement(rad2deg(glMatrix.vec3.angle(front, diff)), 0)
+            direction = glMatrix.vec3.fromValues(0, 0, 0)
         }
 
         if(direction[0] == 0.0 &&
@@ -301,12 +309,19 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         var rad = deg * (PI / 180.0);
         return rad;
     }
+
+    function rad2deg(rad) {
+        var PI = Math.PI;
+        var deg = rad * ( 180.0 / PI);
+        return deg;
+    }
     
     function process_rotation_movement(xoffset, yoffset, constrain_pitch = true) {
         xoffset *= mouse_sensitivity;
         yoffset *= mouse_sensitivity;
     
         yaw += xoffset;
+        yaw = yaw % 360;
         xoffset = deg2rad(xoffset);
         playerMesh.model = glMatrix.mat4.rotate(playerMesh.model, playerMesh.model, -xoffset, rolling_up);
 
