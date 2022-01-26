@@ -267,7 +267,7 @@ var make_player = async function(gl, obj_path="../obj/cube.obj", canvas) {
         update_model_position();
         process_rotation_movement(rotationSpeed, 0);
 
-        ObjectLoader.getInstance().getLights()[1].setPosition(position);
+        // ObjectLoader.getInstance().getLights()[1].setPosition(position);
 
         checkKey(position);
         checkDoor(position);

@@ -19,7 +19,7 @@ class GameObject {
     }
 
     async make(gl){
-        this.mesh = await ObjectLoader.getInstance().make_object_texture(gl, this.objectData);
+        this.mesh = await ObjectLoader.getInstance().make_object(gl, this.objectData);
         this.mesh.model = glMatrix.mat4.translate(this.mesh.model,this.mesh.model,
                     glMatrix.vec3.fromValues(this.x, this.y, this.z));
     }
@@ -54,6 +54,9 @@ class GameObject {
         this.x = position[0];
         this.y = position[1];
         this.z = position[2];
+        this.mesh.model[12] = position[0];
+        this.mesh.model[13] = position[1];
+        this.mesh.model[14] = position[2];
     }
 
     animate(t){}

@@ -20,7 +20,7 @@ var ObjectLoader = (function() {
             else{
                 console.log(`object name not found : ${name}`);
             }
-		}
+		  }
 
         this.init = function(gl){
           this.gl = gl;

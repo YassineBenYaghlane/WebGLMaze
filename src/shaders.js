@@ -446,7 +446,8 @@ var make_shader = function (gl, name) {
       `
       + ObjectLoader.getInstance().generateLightStringComputation()
       + `
-      gl_FragColor = vec4(color, 1.0) * texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
+      // gl_FragColor = vec4(color, 1.0) * texture2D(u_texture, vec2(v_texcoord.x, 1.0-v_texcoord.y));
+      gl_FragColor = vec4(0.0, 0.7, 0.0, 1.0);
       
     }
 `;
